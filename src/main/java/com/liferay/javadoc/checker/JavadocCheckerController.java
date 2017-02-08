@@ -41,6 +41,8 @@ public class JavadocCheckerController {
 	public String service(@RequestBody GithubMessage githubMessage)
 		throws JSONException, IOException, InterruptedException {
 
+		System.out.println("Message from Github Received");
+
 		if (githubMessage.isOpen()) {
 		    GithubPullRequest pullRequest = githubMessage.getPull_request();
 
@@ -54,6 +56,9 @@ public class JavadocCheckerController {
 
 			String repoFullName = repo.getFull_name();
 
+			System.out.println(
+				"Pull Request from " + repoFullName + " - Number " + number);
+
 		    JSONObject data = new JSONObject();
 
 		    data.put("body", "Checking JavaDocs...");
@@ -65,6 +70,8 @@ public class JavadocCheckerController {
 		    curl.append("/issues/");
 		    curl.append(number);
 		    curl.append("/comments");
+
+			System.out.println("Posting a message to the pull request: ");
 
 		    ProcessBuilder pb = new ProcessBuilder(
 		        "curl", "-u", "lfr-checkstyle:c245230f8c463ad7284bb6d004d2cdae662411cc",
