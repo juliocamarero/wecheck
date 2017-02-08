@@ -13,39 +13,53 @@
  */
 package com.liferay.javadoc.checker;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.Random;
+import org.apache.commons.io.FileUtils;
+
 @Controller
+@RequestMapping("/github")
 public class JavadocCheckerController {
 
-	@GetMapping("/")
+	@RequestMapping(value= "/test", method = RequestMethod.GET)
 	@ResponseBody
-	public String service() {
-		return "It works!";
+	public String hello() {
+		return "hello";
+	}
 
+	@RequestMapping(value= "/pull-request", method = RequestMethod.POST)
+	@ResponseBody
+	public String service(@RequestBody GithubMessage githubMessage)
+		throws JSONException, IOException, InterruptedException {
 
-		JSONObject jsonObj = JSONFactoryUtil.createJSONObject(IOUtils.toString(request.getReader()));
+		if (githubMessage.isOpen()) {
+		    GithubPullRequest pullRequest = githubMessage.getPull_request();
 
-		if ("opened".equals(jsonObj.getString("action"))) {
-		    JSONObject pr = jsonObj.getJSONObject("pull_request");
+		    GithubPullRequestHead head = pullRequest.getHead();
 
-		    JSONObject head = pr.getJSONObject("head");
+		    String ref = head.getRef();
 
-		    String ref = head.getString("ref");
+			String number = githubMessage.getNumber();
 
-		    String number = jsonObj.getString("number");
+		    GithubRepo repo = head.getRepo();
 
-		    JSONObject repo = head.getJSONObject("repo");
+			String repoFullName = repo.getFull_name();
 
-		    String repoFullName = repo.getString("full_name");
-
-		    JSONObject data = JSONFactoryUtil.createJSONObject();
+		    JSONObject data = new JSONObject();
 
 		    data.put("body", "Checking JavaDocs...");
 
-		    StringBundler curl = new StringBundler(5);
+		    StringBuilder curl = new StringBuilder(5);
+
 		    curl.append("https://api.github.com/repos/");
 		    curl.append(repoFullName);
 		    curl.append("/issues/");
@@ -68,16 +82,13 @@ public class JavadocCheckerController {
 
 		    String folderName = ref + String.valueOf(random.nextLong());
 
-		    StringBundler sb = new StringBundler(9);
+			StringBuilder sb = new StringBuilder(6);
 
 		    sb.append("git clone https://github.com/");
 		    sb.append(repoFullName);
-		    sb.append(StringPool.SPACE);
-		    sb.append("-b");
-		    sb.append(StringPool.SPACE);
+		    sb.append(" -b ");
 		    sb.append(ref);
-		    sb.append(StringPool.SPACE);
-		    sb.append("/tmp/");
+		    sb.append(" /tmp/");
 		    sb.append(folderName);
 
 		    Process clone = runtime.exec(sb.toString());
@@ -89,12 +100,10 @@ public class JavadocCheckerController {
 		    Process build = runtime.exec("/opt/gradle-3.0/bin/gradle checkstyle", new String[]{}, dir);
 
 		    build.waitFor();
-
-		    StringBundler url = new StringBundler(9);
-
+			
 		    File reportFile = new File(dir, "checkstyle_report.html");
 
-		    data = JSONFactoryUtil.createJSONObject();
+		    data = new JSONObject();
 
 		    data.put("body", FileUtils.readFileToString(new File(dir, "checkstyle_report.html")));
 
@@ -109,6 +118,8 @@ public class JavadocCheckerController {
 		    FileUtils.deleteDirectory(dir);
 
 		}
+
+		return "SUCCESS";
 	}
 
 }
