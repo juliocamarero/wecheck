@@ -122,6 +122,16 @@ public class JavadocCheckerController {
 		  	new UsernamePasswordCredentialsProvider(githubUser,githubKey))
 		  .call();
 
+		LOGGER.info("Giving execution permission to Gradlew");
+
+		ProcessBuilder chmod = new ProcessBuilder(
+			"chmod", "+x", projectDir + "/gradlew");
+
+		chmod.redirectOutput(ProcessBuilder.Redirect.INHERIT);
+		chmod.redirectError(ProcessBuilder.Redirect.INHERIT);
+
+		chmod.start().waitFor();
+
 		ProcessBuilder build = new ProcessBuilder(
 			projectDir + "/gradlew", "-p", projectDir, "checkstyle");
 
