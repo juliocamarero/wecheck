@@ -13,6 +13,9 @@
  */
 package com.liferay.javadoc.checker;
 
+import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.stereotype.Controller;
@@ -36,6 +39,8 @@ import org.apache.commons.io.FileUtils;
 
 import javax.xml.bind.DatatypeConverter;
 
+import static java.util.Collections.singleton;
+
 @Controller
 @RequestMapping("/github")
 public class JavadocCheckerController {
@@ -48,8 +53,7 @@ public class JavadocCheckerController {
 
 	@RequestMapping(value= "/pull-request", method = RequestMethod.POST)
 	@ResponseBody
-	public String service(@RequestBody GithubMessage githubMessage)
-		throws JSONException, IOException, InterruptedException {
+	public String service(@RequestBody GithubMessage githubMessage){
 
 		LOGGER.info("A Message from Github was Received");
 
@@ -71,22 +75,29 @@ public class JavadocCheckerController {
 
 		    JSONObject data = new JSONObject();
 
-		    data.put("body", "Checking JavaDocs...");
+		    try {
+				data.put("body", "Checking JavaDocs...");
 
-			tryToPostMessage(
-				_MAX_RETRIES_DEFAULT, repoFullName, number, data.toString());
+				tryToPostMessage(
+					_MAX_RETRIES_DEFAULT, repoFullName, number,
+					data.toString());
 
-		    String message = executeJavadocsChecker(repoFullName, ref);
+				String message = executeJavadocsChecker(repoFullName, ref);
 
-			tryToPostMessage(
-				_MAX_RETRIES_DEFAULT, repoFullName, number, message);
+				tryToPostMessage(
+					_MAX_RETRIES_DEFAULT, repoFullName, number, message);
+			}
+			catch (Exception e) {
+		    	LOGGER.severe(e.getMessage());
+			}
 		}
 
 		return "SUCCESS";
 	}
 
 	private String executeJavadocsChecker(String repoFullName, String ref)
-		throws IOException, InterruptedException, JSONException {
+		throws IOException, InterruptedException, JSONException,
+				GitAPIException {
 
 		Random random = new Random();
 
@@ -95,25 +106,21 @@ public class JavadocCheckerController {
 		StringBuilder sb = new StringBuilder(6);
 
 		String projectDir = "/tmp/" + folderName;
-
-		sb.append("git clone https://github.com/");
-		sb.append(repoFullName);
-		sb.append(" -b ");
-		sb.append(ref);
-		sb.append(" ");
-		sb.append(projectDir);
-
-		LOGGER.info(sb.toString());
-
-		ProcessBuilder gitClone = new ProcessBuilder(sb.toString().split(" "));
-
-		gitClone.redirectOutput(ProcessBuilder.Redirect.INHERIT);
-		gitClone.redirectError(ProcessBuilder.Redirect.INHERIT);
-
-		gitClone.start().waitFor();
-
 		File dir = new File(projectDir);
 
+		LOGGER.info("Clonning git Repo.");
+
+		String githubUser = System.getenv("githubUser");
+		String githubKey = System.getenv("githubKey");
+
+		Git git = Git.cloneRepository()
+		  .setURI("https://github.com/" +repoFullName)
+		  .setDirectory(dir)
+		  .setBranchesToClone(singleton("refs/heads/" + ref))
+		  .setBranch("refs/heads/" + ref)
+		  .setCredentialsProvider(
+		  	new UsernamePasswordCredentialsProvider(githubUser,githubKey))
+		  .call();
 
 		ProcessBuilder build = new ProcessBuilder(
 			projectDir + "/gradlew", "-p", projectDir, "checkstyle");
@@ -132,6 +139,8 @@ public class JavadocCheckerController {
 			FileUtils.readFileToString(reportFile, Charset.defaultCharset()));
 
 		FileUtils.deleteDirectory(dir);
+
+		git.close();
 
 		return data.toString();
 	}
