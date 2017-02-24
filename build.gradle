@@ -4,12 +4,17 @@ buildscript {
 	}
 	repositories {
 		mavenCentral()
+		maven {
+			url "https://cdn.lfrs.sl/repository.liferay.com/nexus/content/groups/public"
+		}
 	}
 	dependencies {
+		classpath group: "com.liferay", name: "com.liferay.gradle.plugins.source.formatter", version: "1.0.90"
 		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
 	}
 }
 
+apply plugin: "com.liferay.source.formatter"
 apply plugin: 'java'
 apply plugin: 'org.springframework.boot'
 
