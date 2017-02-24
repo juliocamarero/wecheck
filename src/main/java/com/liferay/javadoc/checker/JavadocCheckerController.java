@@ -13,69 +13,89 @@
  */
 package com.liferay.javadoc.checker;
 
-import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import static java.util.Collections.singleton;
+
+import com.liferay.javadoc.checker.checkstyle.CheckStyleExecutor;
+import com.liferay.javadoc.checker.configuration.JavadocCheckerConfigurationReader;
+import com.liferay.javadoc.checker.github.GithubMessage;
+import com.liferay.javadoc.checker.github.GithubPullRequest;
+import com.liferay.javadoc.checker.github.GithubPullRequestHead;
+import com.liferay.javadoc.checker.github.GithubRepo;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.nio.charset.Charset;
+
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 import java.util.logging.Logger;
 
+import javax.xml.bind.DatatypeConverter;
+import javax.xml.transform.TransformerException;
+
 import org.apache.commons.io.FileUtils;
 
-import javax.xml.bind.DatatypeConverter;
+import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 
-import static java.util.Collections.singleton;
+import org.json.JSONException;
+import org.json.JSONObject;
 
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 @Controller
 @RequestMapping("/github")
 public class JavadocCheckerController {
 
-	@RequestMapping(value= "/test", method = RequestMethod.GET)
+	public static void sleep(long duration) {
+		try {
+			Thread.sleep(duration);
+		}
+		catch (InterruptedException ie) {
+			throw new RuntimeException(ie);
+		}
+	}
+
+	@RequestMapping(value = "/test", method = RequestMethod.GET)
 	@ResponseBody
 	public String hello() {
 		return "hello";
 	}
 
-	@RequestMapping(value= "/pull-request", method = RequestMethod.POST)
+	@RequestMapping(value = "/pull-request", method = RequestMethod.POST)
 	@ResponseBody
-	public String service(@RequestBody GithubMessage githubMessage){
-
+	public String service(@RequestBody GithubMessage githubMessage) {
 		LOGGER.info("A Message from Github was Received");
 
 		if (githubMessage.isOpen()) {
-		    GithubPullRequest pullRequest = githubMessage.getPull_request();
+			GithubPullRequest pullRequest = githubMessage.getPull_request();
 
-		    GithubPullRequestHead head = pullRequest.getHead();
+			GithubPullRequestHead head = pullRequest.getHead();
 
-		    String ref = head.getRef();
+			String ref = head.getRef();
 
 			String number = githubMessage.getNumber();
 
-		    GithubRepo repo = head.getRepo();
+			GithubRepo repo = head.getRepo();
 
 			String repoFullName = repo.getFull_name();
 
 			LOGGER.info(
 				"Pull Request from " + repoFullName + " - Number " + number);
 
-		    JSONObject data = new JSONObject();
+			JSONObject data = new JSONObject();
 
-		    try {
+			try {
 				data.put("body", "Checking JavaDocs...");
 
 				tryToPostMessage(
@@ -88,7 +108,7 @@ public class JavadocCheckerController {
 					_MAX_RETRIES_DEFAULT, repoFullName, number, message);
 			}
 			catch (Exception e) {
-		    	LOGGER.severe(e.getMessage());
+				LOGGER.severe(e.getMessage());
 			}
 		}
 
@@ -96,15 +116,12 @@ public class JavadocCheckerController {
 	}
 
 	private String executeJavadocsChecker(String repoFullName, String ref)
-		throws IOException, InterruptedException, JSONException,
-				GitAPIException {
+		throws GitAPIException, InterruptedException, IOException,
+		JSONException, TransformerException {
 
 		Random random = new Random();
 
 		String folderName = ref + String.valueOf(random.nextLong());
-
-		StringBuilder sb = new StringBuilder(6);
-
 		String projectDir = "/tmp/" + folderName;
 		File dir = new File(projectDir);
 
@@ -114,45 +131,110 @@ public class JavadocCheckerController {
 		String githubKey = System.getenv("githubKey");
 
 		Git git = Git.cloneRepository()
-		  .setURI("https://github.com/" +repoFullName)
-		  .setDirectory(dir)
-		  .setBranchesToClone(singleton("refs/heads/" + ref))
-		  .setBranch("refs/heads/" + ref)
-		  .setCredentialsProvider(
-		  	new UsernamePasswordCredentialsProvider(githubUser,githubKey))
-		  .call();
+		.setURI("https://github.com/" +repoFullName)
+		.setDirectory(dir)
+		.setBranchesToClone(singleton("refs/heads/" + ref))
+		.setBranch("refs/heads/" + ref)
+		.setCredentialsProvider(
+			new UsernamePasswordCredentialsProvider(githubUser, githubKey))
+		.call();
 
-		LOGGER.info("Giving execution permission to Gradlew");
+		LOGGER.info("Executing checkStyle in repo.");
 
-		ProcessBuilder chmod = new ProcessBuilder(
-			"chmod", "+x", projectDir + "/gradlew");
+		JavadocCheckerConfigurationReader configurationReader =
+			new JavadocCheckerConfigurationReader(projectDir);
 
-		chmod.redirectOutput(ProcessBuilder.Redirect.INHERIT);
-		chmod.redirectError(ProcessBuilder.Redirect.INHERIT);
+		Map<String, Object> parameters = new HashMap();
 
-		chmod.start().waitFor();
-
-		ProcessBuilder build = new ProcessBuilder(
-			projectDir + "/gradlew", "-p", projectDir, "checkstyle");
-
-		build.redirectOutput(ProcessBuilder.Redirect.INHERIT);
-		build.redirectError(ProcessBuilder.Redirect.INHERIT);
-
-		build.start().waitFor();
-
-		File reportFile = new File(dir, "checkstyle_report.html");
+		parameters.put("report-title", configurationReader.getReportTitle());
 
 		JSONObject data = new JSONObject();
 
-		data.put(
-			"body",
-			FileUtils.readFileToString(reportFile, Charset.defaultCharset()));
+		CheckStyleExecutor checkStyleExecutor = new CheckStyleExecutor(
+			configurationReader.getIncludeDirectories(),
+			configurationReader.getExcludeDirectories(), parameters, true);
+
+		String message = checkStyleExecutor.execute();
+
+		data.put("body", message);
 
 		FileUtils.deleteDirectory(dir);
 
 		git.close();
 
 		return data.toString();
+	}
+
+	private String postMessage(
+			String repoFullName, String number, String message)
+		throws IOException {
+
+		StringBuilder url = new StringBuilder(5);
+
+		url.append("https://api.github.com/repos/");
+		url.append(repoFullName);
+		url.append("/issues/");
+		url.append(number);
+		url.append("/comments");
+
+		URL urlObject = new URL(url.toString());
+
+		HttpURLConnection connection =
+			(HttpURLConnection)urlObject.openConnection();
+
+		connection.setRequestMethod("POST");
+
+		String githubUser = System.getenv("githubUser");
+		String githubKey = System.getenv("githubKey");
+
+		String userpass = githubUser + ":" + githubKey;
+
+		String basicAuth = "Basic " +
+			DatatypeConverter.printBase64Binary(userpass.getBytes("UTF-8"));
+
+		connection.setRequestProperty("Authorization", basicAuth);
+
+		connection.setRequestProperty("Content-Type", "application/json");
+
+		connection.setDoOutput(true);
+
+		OutputStreamWriter out = new OutputStreamWriter(
+			connection.getOutputStream());
+
+		out.write(message);
+		out.close();
+
+		int bytes = 0;
+		String line = null;
+
+		StringBuilder sb = new StringBuilder();
+
+		try (BufferedReader bufferedReader = new BufferedReader(
+				new InputStreamReader(connection.getInputStream()))) {
+
+			while ((line = bufferedReader.readLine()) != null) {
+				byte[] lineBytes = line.getBytes();
+
+				bytes += lineBytes.length;
+
+				if (bytes > (30 * 1024 * 1024)) {
+					sb.append("Response for ");
+					sb.append(url);
+					sb.append(" was truncated due to its size.");
+
+					break;
+				}
+
+				sb.append(line);
+				sb.append("\n");
+			}
+		}
+
+		String response = sb.toString();
+
+		LOGGER.info("Comment posted successfully to Github");
+
+		return response;
 	}
 
 	private void tryToPostMessage(
@@ -181,92 +263,11 @@ public class JavadocCheckerController {
 		}
 	}
 
-	public static void sleep(long duration) {
-		try {
-			Thread.sleep(duration);
-		}
-		catch (InterruptedException ie) {
-			throw new RuntimeException(ie);
-		}
-	}
-
-	private String postMessage(String repoFullName, String number, String message)
-		throws IOException {
-
-		StringBuilder url = new StringBuilder(5);
-
-		url.append("https://api.github.com/repos/");
-		url.append(repoFullName);
-		url.append("/issues/");
-		url.append(number);
-		url.append("/comments");
-
-		URL urlObject = new URL(url.toString());
-
-		HttpURLConnection connection =
-			(HttpURLConnection)urlObject.openConnection();
-
-		connection.setRequestMethod("POST");
-
-		String githubUser = System.getenv("githubUser");
-		String githubKey = System.getenv("githubKey");
-
-		String userpass = githubUser + ":" + githubKey;
-		String basicAuth = "Basic " +
-			DatatypeConverter.printBase64Binary(userpass.getBytes("UTF-8"));
-
-		connection.setRequestProperty(
-			"Authorization", basicAuth);
-
-		connection.setRequestProperty(
-			"Content-Type", "application/json");
-
-		connection.setDoOutput(true);
-		
-		OutputStreamWriter out = new OutputStreamWriter(
-			connection.getOutputStream());
-
-		out.write(message);
-	    out.close();
-
-		int bytes = 0;
-		String line = null;
-
-		StringBuilder sb = new StringBuilder();
-
-		try (BufferedReader bufferedReader = new BufferedReader(
-				new InputStreamReader(
-					connection.getInputStream()))) {
-
-			while ((line = bufferedReader.readLine()) != null) {
-				byte[] lineBytes = line.getBytes();
-
-				bytes += lineBytes.length;
-
-				if (bytes > (30 * 1024 * 1024)) {
-					sb.append("Response for ");
-					sb.append(url);
-					sb.append(" was truncated due to its size.");
-
-					break;
-				}
-
-				sb.append(line);
-				sb.append("\n");
-			}
-		}
-
-		String response = sb.toString();
-
-		LOGGER.info("Comment posted successfully to Github");
-
-		return response;
-	}
-
-	private static final int _RETRY_PERIOD_DEFAULT = 5;
 	private static final int _MAX_RETRIES_DEFAULT = 3;
 
-	private final static Logger LOGGER = Logger.getLogger(
+	private static final int _RETRY_PERIOD_DEFAULT = 5;
+
+	private static final Logger LOGGER = Logger.getLogger(
 		JavadocCheckerController.class.getName());
 
 }
