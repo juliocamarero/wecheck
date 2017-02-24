@@ -11,44 +11,22 @@
  * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
  * details.
  */
-package com.liferay.javadoc.checker;
+package com.liferay.javadoc.checker.github;
 
 /**
  *
  * @author Julio Camarero
  */
-public class GithubMessage {
+public class GithubRepo {
 
-	public String getAction() {
-		return _action;
+	public String getFull_name() {
+		return _full_name;
 	}
 
-	public String getNumber() {
-		return _number;
+	public void setFull_name(String full_name) {
+		_full_name = full_name;
 	}
 
-	public GithubPullRequest getPull_request() {
-		return _pull_request;
-	}
-
-	public boolean isOpen() {
-		return "opened".equals(_action);
-	}
-
-	public void setAction(String action) {
-		_action = action;
-	}
-
-	public void setNumber(String number) {
-		_number = number;
-	}
-
-	public void setPull_request(GithubPullRequest pull_request) {
-		_pull_request = pull_request;
-	}
-
-	private String _action;
-	private String _number;
-	private GithubPullRequest _pull_request;
+	private String _full_name;
 
 }
