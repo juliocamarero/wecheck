@@ -14,7 +14,6 @@
 package com.liferay.javadoc.checker.github;
 
 /**
- *
  * @author Julio Camarero
  */
 public class GithubPullRequestHead {
@@ -37,4 +36,5 @@ public class GithubPullRequestHead {
 
 	private String _ref;
 	private GithubRepo _repo;
+
 }

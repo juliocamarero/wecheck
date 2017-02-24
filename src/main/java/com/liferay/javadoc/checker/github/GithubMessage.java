@@ -14,7 +14,6 @@
 package com.liferay.javadoc.checker.github;
 
 /**
- *
  * @author Julio Camarero
  */
 public class GithubMessage {
