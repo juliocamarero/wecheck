@@ -91,11 +91,11 @@ public class CheckStyleExecutor {
 			Files.readAllBytes(Paths.get(_outputXMLFile)),
 			StandardCharsets.UTF_8);
 
-		LOGGER.info(reportXML);
+		LOGGER.fine(reportXML);
 
 		String reportHTML = transform();
 
-		LOGGER.info(reportHTML);
+		LOGGER.fine(reportHTML);
 
 		return reportHTML;
 	}
