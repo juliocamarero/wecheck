@@ -42,6 +42,8 @@ public class JavadocCheckerConfigurationReader {
 			String value = _properties.getProperty("exclude.directories");
 
 			if ((value != null) && !value.isEmpty()) {
+				LOGGER.info("Directories to ignore: " + value);
+
 				String[] relativeDirectories = value.split(",");
 
 				excludeDirectories = new String[relativeDirectories.length];
@@ -63,6 +65,8 @@ public class JavadocCheckerConfigurationReader {
 			String value = _properties.getProperty("include.directories");
 
 			if ((value != null) && !value.isEmpty()) {
+				LOGGER.info("Directories to analize: " + value);
+
 				String[] relativeDirectories = value.split(",");
 				includeDirectories = new String[relativeDirectories.length];
 
@@ -81,6 +85,8 @@ public class JavadocCheckerConfigurationReader {
 
 		if (_properties != null) {
 			reportTitle = _properties.getProperty("report.title");
+
+			LOGGER.info("Report Title read from properties: " + reportTitle);
 		}
 
 		if (reportTitle != null && !reportTitle.isEmpty()) {
