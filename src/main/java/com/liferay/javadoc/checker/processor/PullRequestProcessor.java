@@ -255,6 +255,9 @@ public class PullRequestProcessor {
 	private String _pullRequestNumber;
 	private String _pullRequestRef;
 	private String _repoFullName;
+
+	// This is legacy and will be removed
+
 	private boolean printInitialMessage = false;
 
 }
