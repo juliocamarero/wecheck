@@ -13,40 +13,13 @@
  */
 package com.liferay.javadoc.checker;
 
-import static java.util.Collections.singleton;
-
-import com.liferay.javadoc.checker.checkstyle.CheckStyleExecutor;
-import com.liferay.javadoc.checker.configuration.JavadocCheckerConfigurationReader;
 import com.liferay.javadoc.checker.github.GithubMessage;
 import com.liferay.javadoc.checker.github.GithubPullRequest;
 import com.liferay.javadoc.checker.github.GithubPullRequestHead;
 import com.liferay.javadoc.checker.github.GithubRepo;
+import com.liferay.javadoc.checker.processor.PullRequestProcessor;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-
-import java.net.HttpURLConnection;
-import java.net.URL;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
 import java.util.logging.Logger;
-
-import javax.xml.bind.DatatypeConverter;
-import javax.xml.transform.TransformerException;
-
-import org.apache.commons.io.FileUtils;
-
-import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -56,15 +29,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @Controller
 @RequestMapping("/github")
 public class JavadocCheckerController {
-
-	public static void sleep(long duration) {
-		try {
-			Thread.sleep(duration);
-		}
-		catch (InterruptedException ie) {
-			throw new RuntimeException(ie);
-		}
-	}
 
 	@RequestMapping(value = "/test", method = RequestMethod.GET)
 	@ResponseBody
@@ -93,19 +57,11 @@ public class JavadocCheckerController {
 			LOGGER.info(
 				"Pull Request from " + repoFullName + " - Number " + number);
 
-			JSONObject data = new JSONObject();
+			PullRequestProcessor pullRequestProcessor =
+				new PullRequestProcessor(pullRequest);
 
 			try {
-				data.put("body", "Checking JavaDocs...");
-
-				tryToPostMessage(
-					_MAX_RETRIES_DEFAULT, repoFullName, number,
-					data.toString());
-
-				String message = executeJavadocsChecker(repoFullName, ref);
-
-				tryToPostMessage(
-					_MAX_RETRIES_DEFAULT, repoFullName, number, message);
+				pullRequestProcessor.process();
 			}
 			catch (Exception e) {
 				LOGGER.severe(e.getMessage());
@@ -114,158 +70,6 @@ public class JavadocCheckerController {
 
 		return "SUCCESS";
 	}
-
-	private String executeJavadocsChecker(String repoFullName, String ref)
-		throws GitAPIException, InterruptedException, IOException,
-		JSONException, TransformerException {
-
-		Random random = new Random();
-
-		String folderName = ref + String.valueOf(random.nextLong());
-		String projectDir = "/tmp/" + folderName;
-		File dir = new File(projectDir);
-
-		LOGGER.info("Clonning git Repo.");
-
-		String githubUser = System.getenv("githubUser");
-		String githubKey = System.getenv("githubKey");
-
-		Git git = Git.cloneRepository()
-		.setURI("https://github.com/" +repoFullName)
-		.setDirectory(dir)
-		.setBranchesToClone(singleton("refs/heads/" + ref))
-		.setBranch("refs/heads/" + ref)
-		.setCredentialsProvider(
-			new UsernamePasswordCredentialsProvider(githubUser, githubKey))
-		.call();
-
-		LOGGER.info("Executing checkStyle in repo.");
-
-		JavadocCheckerConfigurationReader configurationReader =
-			new JavadocCheckerConfigurationReader(projectDir);
-
-		Map<String, Object> parameters = new HashMap();
-
-		parameters.put("report-title", configurationReader.getReportTitle());
-
-		JSONObject data = new JSONObject();
-
-		CheckStyleExecutor checkStyleExecutor = new CheckStyleExecutor(
-			configurationReader.getIncludeDirectories(),
-			configurationReader.getExcludeDirectories(), parameters, true);
-
-		String message = checkStyleExecutor.execute();
-
-		data.put("body", message);
-
-		FileUtils.deleteDirectory(dir);
-
-		git.close();
-
-		return data.toString();
-	}
-
-	private String postMessage(
-			String repoFullName, String number, String message)
-		throws IOException {
-
-		StringBuilder url = new StringBuilder(5);
-
-		url.append("https://api.github.com/repos/");
-		url.append(repoFullName);
-		url.append("/issues/");
-		url.append(number);
-		url.append("/comments");
-
-		URL urlObject = new URL(url.toString());
-
-		HttpURLConnection connection =
-			(HttpURLConnection)urlObject.openConnection();
-
-		connection.setRequestMethod("POST");
-
-		String githubUser = System.getenv("githubUser");
-		String githubKey = System.getenv("githubKey");
-
-		String userpass = githubUser + ":" + githubKey;
-
-		String basicAuth = "Basic " +
-			DatatypeConverter.printBase64Binary(userpass.getBytes("UTF-8"));
-
-		connection.setRequestProperty("Authorization", basicAuth);
-
-		connection.setRequestProperty("Content-Type", "application/json");
-
-		connection.setDoOutput(true);
-
-		OutputStreamWriter out = new OutputStreamWriter(
-			connection.getOutputStream());
-
-		out.write(message);
-		out.close();
-
-		int bytes = 0;
-		String line = null;
-
-		StringBuilder sb = new StringBuilder();
-
-		try (BufferedReader bufferedReader = new BufferedReader(
-				new InputStreamReader(connection.getInputStream()))) {
-
-			while ((line = bufferedReader.readLine()) != null) {
-				byte[] lineBytes = line.getBytes();
-
-				bytes += lineBytes.length;
-
-				if (bytes > (30 * 1024 * 1024)) {
-					sb.append("Response for ");
-					sb.append(url);
-					sb.append(" was truncated due to its size.");
-
-					break;
-				}
-
-				sb.append(line);
-				sb.append("\n");
-			}
-		}
-
-		String response = sb.toString();
-
-		LOGGER.info("Comment posted successfully to Github");
-
-		return response;
-	}
-
-	private void tryToPostMessage(
-			int maxRetries, String repoFullName, String number, String message)
-		throws IOException {
-
-		int retryCount = 0;
-
-		try {
-			postMessage(repoFullName, number, message);
-		}
-		catch (IOException ioe) {
-			LOGGER.warning("Error when posting comment in github.");
-
-			retryCount++;
-
-			if ((maxRetries >= 0) && (retryCount >= maxRetries)) {
-				throw ioe;
-			}
-
-			LOGGER.warning(
-				"Retrying in " + _RETRY_PERIOD_DEFAULT + " seconds. (" +
-				retryCount + ")");
-
-			sleep(1000 * _RETRY_PERIOD_DEFAULT);
-		}
-	}
-
-	private static final int _MAX_RETRIES_DEFAULT = 3;
-
-	private static final int _RETRY_PERIOD_DEFAULT = 5;
 
 	private static final Logger LOGGER = Logger.getLogger(
 		JavadocCheckerController.class.getName());
