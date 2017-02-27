@@ -89,7 +89,7 @@ public class JavadocCheckerConfigurationReader {
 			LOGGER.info("Report Title read from properties: " + reportTitle);
 		}
 
-		if (reportTitle != null && !reportTitle.isEmpty()) {
+		if ((reportTitle == null) || reportTitle.isEmpty()) {
 			reportTitle = _defaultReportTitle;
 		}
 
