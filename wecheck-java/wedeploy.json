@@ -2,5 +2,5 @@
 	"hooks": {
 		"build": "gradle -Dorg.gradle.native=false clean build -x test"
 	},
-	"id": "wecheck"
+	"id": "api"
 }
