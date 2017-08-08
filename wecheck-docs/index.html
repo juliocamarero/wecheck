@@ -2,45 +2,67 @@
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
-	<title>It works!</title>
+	<title>WeCheck Project</title>
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,700">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
+
 	<style>
 	body {
-	    background: #0e141a;
+	    background: #ffffff;
 	    font-family: 'Open Sans', sans-serif;
 	}
-	.container {
-		position: absolute;
-		top: 50%;
-		left: 50%;
-		transform: translate(-50%, -50%);
-		text-align: center;
-	}
+
 	h1 {
-		font-size: 72px;
-		font-weight: 700;
 		color: #00d46a;
-		margin: 0;
 	}
 	h2 {
-		font-weight: 300;
-		color: rgba(255, 255, 255, 0.9);
-		margin: 0;
-	}
-	.logo {
-		position: absolute;
-		bottom: 20px;
-		left: 50%;
-		transform: translate(-50%, -50%);
+		color: #0e141a;
 	}
 	</style>
 </head>
 <body>
 	<div class="container">
-		<h1>Your site is live!</h1>
-		<h2>Go grab a cold lemonade and celebrate.</h2>
-	</div>
+		<h1>WeCheck your Code!</h1>
+		<h2>Let us help you find out how you can improve your code.</h2>
 
-	<img class="logo" src="https://cloud.githubusercontent.com/assets/398893/16279177/af9b3622-386e-11e6-920e-3a3f33169831.png" width="150" alt="WeDeploy">
+		<p>The first service we provide is calculating the percentage of
+		javadoc in your github project.</p>
+
+		<h3>Set Up</h3>
+
+		<p>In order to start using WeCheck you need to follow these simple
+		steps: </p>
+
+		<ol>
+			<li>Add this url as a Webhook in your github repo:
+				<em>https://api-wecheck.wedeploy.io/github/pull-request</em>
+			</li>
+			<li>Give the user <strong>liferay-dev-ci</strong> permission to write in your repo.
+			</li>
+			<li>
+				Add a file in the root of your github repo called: wecheck.properties. <br />
+				This file should contain the following properties:
+
+				<table class="table">
+					<tr>
+						<th>Property</th>
+						<th>Value</th>
+					</tr>
+					<tr>
+						<td>include.directories</td>
+						<td>The list of directories that should be scanned (separated by commas)</td>
+					</tr>
+					<tr>
+						<td>exclude.directories (optional)</td>
+						<td>The list of directories that shouldn't be scanned (separated by commas)</td>
+					</tr>
+					<tr>
+						<td>report.title (optional)</td>
+						<td>The name of the report that is generated</td>
+					</tr>
+				</table>
+			</li>
+		</ol>
+	</div>
 </body>
 </html>
