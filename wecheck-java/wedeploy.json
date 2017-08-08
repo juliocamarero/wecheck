@@ -2,7 +2,5 @@
 	"hooks": {
 		"build": "gradle -Dorg.gradle.native=false clean build -x test"
 	},
-	"id": "java",
-	"name": "Java",
-	"type": "wedeploy/java"
+	"id": "wecheck"
 }
