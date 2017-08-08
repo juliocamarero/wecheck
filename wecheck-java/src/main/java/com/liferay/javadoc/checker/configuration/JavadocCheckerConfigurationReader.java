@@ -135,6 +135,6 @@ public class JavadocCheckerConfigurationReader {
 	private String _defaultReportTitle = "";
 	private String _projectDirectory;
 	private Properties _properties;
-	private String _propertiesFile = "javadocChecker.properties";
+	private String _propertiesFile = "wecheck.properties";
 
 }
