@@ -32,6 +32,7 @@ import java.net.URL;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Random;
 import java.util.logging.Logger;
 
@@ -99,7 +100,14 @@ public class PullRequestProcessor {
 		LOGGER.info("Clonning git Repo.");
 
 		String githubUser = System.getenv("githubUser");
-		String githubKey = System.getenv("githubKey");
+		String githubPassword = System.getenv("githubPassword");
+
+		if (Objects.isNull(githubUser) || Objects.isNull(githubPassword)) {
+			LOGGER.severe("Missing githubUser or githubPassword environment variables");
+		}
+		else {
+			LOGGER.info("Using github user: " + githubUser);
+		}
 
 		Git git = Git.cloneRepository()
 		.setURI("https://github.com/" +repoFullName)
@@ -107,7 +115,7 @@ public class PullRequestProcessor {
 		.setBranchesToClone(singleton("refs/heads/" + ref))
 		.setBranch("refs/heads/" + ref)
 		.setCredentialsProvider(
-			new UsernamePasswordCredentialsProvider(githubUser, githubKey))
+			new UsernamePasswordCredentialsProvider(githubUser, githubPassword))
 		.call();
 
 		LOGGER.info("Executing checkStyle in repo.");
@@ -258,6 +266,6 @@ public class PullRequestProcessor {
 
 	// This is legacy and will be removed
 
-	private boolean printInitialMessage = false;
+	private boolean printInitialMessage = true;
 
 }
