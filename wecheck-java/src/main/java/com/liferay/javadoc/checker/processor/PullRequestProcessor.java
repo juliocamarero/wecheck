@@ -164,13 +164,20 @@ public class PullRequestProcessor {
 		connection.setRequestMethod("POST");
 
 		String githubUser = System.getenv("githubUser");
-		String githubKey = System.getenv("githubKey");
+		String githubPassword = System.getenv("githubPassword");
 
-		String userpass = githubUser + ":" + githubKey;
+		if (Objects.isNull(githubUser) || Objects.isNull(githubPassword)) {
+			LOGGER.severe("Missing githubUser or githubPassword environment variables");
+		}
+		else {
+			LOGGER.info("Using github user: " + githubUser);
+		}
+
+		String userpass = githubUser + ":" + githubPassword;
 
 		String basicAuth = "Basic " +
-						DatatypeConverter.printBase64Binary(
-							userpass.getBytes("UTF-8"));
+			DatatypeConverter.printBase64Binary(
+				userpass.getBytes("UTF-8"));
 
 		connection.setRequestProperty("Authorization", basicAuth);
 
