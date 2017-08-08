@@ -99,23 +99,14 @@ public class PullRequestProcessor {
 
 		LOGGER.info("Clonning git Repo.");
 
-		String githubUser = System.getenv("githubUser");
-		String githubPassword = System.getenv("githubPassword");
-
-		if (Objects.isNull(githubUser) || Objects.isNull(githubPassword)) {
-			LOGGER.severe("Missing githubUser or githubPassword environment variables");
-		}
-		else {
-			LOGGER.info("Using github user: " + githubUser);
-		}
-
 		Git git = Git.cloneRepository()
 		.setURI("https://github.com/" +repoFullName)
 		.setDirectory(dir)
 		.setBranchesToClone(singleton("refs/heads/" + ref))
 		.setBranch("refs/heads/" + ref)
 		.setCredentialsProvider(
-			new UsernamePasswordCredentialsProvider(githubUser, githubPassword))
+			new UsernamePasswordCredentialsProvider(
+				getGithubUser(), getGithubPassword()))
 		.call();
 
 		LOGGER.info("Executing checkStyle in repo.");
@@ -144,6 +135,31 @@ public class PullRequestProcessor {
 		return data.toString();
 	}
 
+	private String getGithubPassword() {
+		String githubPassword = System.getenv("githubPassword");
+
+		if (Objects.isNull(githubPassword)) {
+			LOGGER.severe(
+				"Missing githubPassword environment variables");
+		}
+
+		return githubPassword;
+	}
+
+	private String getGithubUser() {
+		String githubUser = System.getenv("githubUser");
+
+		if (Objects.isNull(githubUser)) {
+			LOGGER.severe(
+				"Missing githubUser environment variables");
+		}
+		else {
+			LOGGER.info("Using github user: " + githubUser);
+		}
+
+		return githubUser;
+	}
+
 	private String postMessage(
 			String repoFullName, String number, String message)
 		throws IOException {
@@ -163,17 +179,7 @@ public class PullRequestProcessor {
 
 		connection.setRequestMethod("POST");
 
-		String githubUser = System.getenv("githubUser");
-		String githubPassword = System.getenv("githubPassword");
-
-		if (Objects.isNull(githubUser) || Objects.isNull(githubPassword)) {
-			LOGGER.severe("Missing githubUser or githubPassword environment variables");
-		}
-		else {
-			LOGGER.info("Using github user: " + githubUser);
-		}
-
-		String userpass = githubUser + ":" + githubPassword;
+		String userpass = getGithubUser() + ":" + getGithubPassword();
 
 		String basicAuth = "Basic " +
 			DatatypeConverter.printBase64Binary(
@@ -273,6 +279,6 @@ public class PullRequestProcessor {
 
 	// This is legacy and will be removed
 
-	private boolean printInitialMessage = true;
+	private boolean printInitialMessage = false;
 
 }
