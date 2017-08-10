@@ -23,6 +23,7 @@ import java.util.logging.Logger;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -38,9 +39,15 @@ public class JavadocCheckerController {
 
 	@RequestMapping(value = "/pull-request", method = RequestMethod.POST)
 	@ResponseBody
-	public String service(@RequestBody GithubMessage githubMessage) {
+	public String service(
+		@RequestHeader(value="HTTP_X_GITHUB_EVENT") String eventType,
+		@RequestBody GithubMessage githubMessage) {
+
 		LOGGER.info(
 			"A Message from Github was Received: " + githubMessage.getAction());
+
+		LOGGER.info(
+			"EventType: " + eventType);
 
 		if (githubMessage.isOpen()) {
 			PullRequestProcessor pullRequestProcessor =
