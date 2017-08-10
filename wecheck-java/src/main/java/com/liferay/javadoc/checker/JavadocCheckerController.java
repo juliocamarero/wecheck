@@ -39,26 +39,13 @@ public class JavadocCheckerController {
 	@RequestMapping(value = "/pull-request", method = RequestMethod.POST)
 	@ResponseBody
 	public String service(@RequestBody GithubMessage githubMessage) {
-		LOGGER.info("A Message from Github was Received");
+		LOGGER.info(
+			"A Message from Github was Received: " + githubMessage.getAction());
 
 		if (githubMessage.isOpen()) {
-			GithubPullRequest pullRequest = githubMessage.getPull_request();
-
-			GithubPullRequestHead head = pullRequest.getHead();
-
-			String ref = head.getRef();
-
-			String number = githubMessage.getNumber();
-
-			GithubRepo repo = head.getRepo();
-
-			String repoFullName = repo.getFull_name();
-
-			LOGGER.info(
-				"Pull Request from " + repoFullName + " - Number " + number);
-
 			PullRequestProcessor pullRequestProcessor =
-				new PullRequestProcessor(pullRequest);
+				new PullRequestProcessor(
+					githubMessage.getPull_request(), githubMessage.getNumber());
 
 			try {
 				pullRequestProcessor.process();

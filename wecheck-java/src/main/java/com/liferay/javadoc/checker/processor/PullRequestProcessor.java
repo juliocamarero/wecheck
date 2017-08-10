@@ -53,7 +53,7 @@ import org.json.JSONObject;
  */
 public class PullRequestProcessor {
 
-	public PullRequestProcessor(GithubPullRequest pullRequest) {
+	public PullRequestProcessor(GithubPullRequest pullRequest, String number) {
 		_pullRequest = pullRequest;
 
 		GithubPullRequestHead head = _pullRequest.getHead();
@@ -65,6 +65,10 @@ public class PullRequestProcessor {
 		GithubRepo repo = head.getRepo();
 
 		_repoFullName = repo.getFull_name();
+
+		LOGGER.info(
+			"Processing Pull Request from " + _repoFullName + " - Number " +
+				number);
 	}
 
 	public void process()
