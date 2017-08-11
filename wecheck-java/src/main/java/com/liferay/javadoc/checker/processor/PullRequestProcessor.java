@@ -152,7 +152,7 @@ public class PullRequestProcessor {
 				"Missing githubUser environment variables");
 		}
 		else {
-			LOGGER.info("Using github user: " + githubUser);
+			//LOGGER.fine("Using github user: " + githubUser);
 		}
 
 		return githubUser;

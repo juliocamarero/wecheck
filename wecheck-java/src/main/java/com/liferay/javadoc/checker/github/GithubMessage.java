@@ -32,8 +32,8 @@ public class GithubMessage {
 		return _pull_request;
 	}
 
-	public boolean isOpen() {
-		return "opened".equals(_action);
+	public boolean isValidAction() {
+		return ("opened".equals(_action) || "synchronize".equals(_action));
 	}
 
 	public void setAction(String action) {

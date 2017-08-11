@@ -41,12 +41,10 @@ public class JavadocCheckerController {
 		@RequestBody GithubMessage githubMessage) {
 
 		LOGGER.info(
-			"A Message from Github was Received: " + githubMessage.getAction());
+			"Received event from Github: " + eventType + "(" +
+				githubMessage.getAction() + ")");
 
-		LOGGER.info(
-			"EventType: " + eventType);
-
-		if (githubMessage.isOpen()) {
+		if (githubMessage.isValidAction()) {
 			PullRequestProcessor pullRequestProcessor =
 				new PullRequestProcessor(
 					githubMessage.getPull_request());
@@ -57,6 +55,9 @@ public class JavadocCheckerController {
 			catch (Exception e) {
 				LOGGER.severe(e.getMessage());
 			}
+		}
+		else {
+			LOGGER.info("Ignoring event");
 		}
 
 		return "SUCCESS";
