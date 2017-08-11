@@ -13,6 +13,8 @@
  */
 package com.liferay.javadoc.checker.github;
 
+import org.eclipse.egit.github.core.PullRequest;
+
 /**
  * @author Julio Camarero
  */
@@ -26,7 +28,7 @@ public class GithubMessage {
 		return _number;
 	}
 
-	public GithubPullRequest getPull_request() {
+	public PullRequest getPull_request() {
 		return _pull_request;
 	}
 
@@ -42,12 +44,12 @@ public class GithubMessage {
 		_number = number;
 	}
 
-	public void setPull_request(GithubPullRequest pull_request) {
+	public void setPull_request(PullRequest pull_request) {
 		_pull_request = pull_request;
 	}
 
 	private String _action;
 	private String _number;
-	private GithubPullRequest _pull_request;
+	private PullRequest _pull_request;
 
 }

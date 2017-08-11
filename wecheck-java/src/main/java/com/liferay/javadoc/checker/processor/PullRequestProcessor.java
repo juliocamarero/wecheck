@@ -17,9 +17,6 @@ import static java.util.Collections.singleton;
 
 import com.liferay.javadoc.checker.checkstyle.CheckStyleExecutor;
 import com.liferay.javadoc.checker.configuration.JavadocCheckerConfigurationReader;
-import com.liferay.javadoc.checker.github.GithubPullRequest;
-import com.liferay.javadoc.checker.github.GithubPullRequestHead;
-import com.liferay.javadoc.checker.github.GithubRepo;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -48,32 +45,27 @@ import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import org.eclipse.egit.github.core.PullRequest;
+
 /**
  * @author Julio Camarero
  */
 public class PullRequestProcessor {
 
-	public PullRequestProcessor(GithubPullRequest pullRequest, String number) {
+	public PullRequestProcessor(PullRequest pullRequest) {
 		_pullRequest = pullRequest;
 
-		GithubPullRequestHead head = _pullRequest.getHead();
-
-		_pullRequestRef = head.getRef();
-
-		_pullRequestNumber = _pullRequest.getNumber();
-
-		GithubRepo repo = head.getRepo();
-
-		_repoFullName = repo.getFull_name();
-
 		LOGGER.info(
-			"Processing Pull Request from " + _repoFullName + " - Number " +
-				number);
+			"Processing Pull Request from " + _getRepoFullName(_pullRequest) +
+				" - Number " + _pullRequest.getNumber() + " : " +
+					_pullRequest.getTitle());
 	}
 
 	public void process()
 		throws GitAPIException, InterruptedException, IOException,
 		JSONException, TransformerException {
+
+		String repoFullName = _getRepoFullName(_pullRequest);
 
 		if (printInitialMessage) {
 			JSONObject data = new JSONObject();
@@ -81,14 +73,16 @@ public class PullRequestProcessor {
 			data.put("body", "Checking JavaDocs...");
 
 			tryToPostMessage(
-				_MAX_RETRIES_DEFAULT, _repoFullName, _pullRequestNumber,
+				_MAX_RETRIES_DEFAULT, repoFullName, _pullRequest.getNumber(),
 				data.toString());
 		}
 
-		String message = executeJavadocsChecker(_repoFullName, _pullRequestRef);
+		String message = executeJavadocsChecker(
+			repoFullName, _pullRequest.getHead().getRef());
 
 		tryToPostMessage(
-			_MAX_RETRIES_DEFAULT, _repoFullName, _pullRequestNumber, message);
+			_MAX_RETRIES_DEFAULT, repoFullName, _pullRequest.getNumber(),
+			message);
 	}
 
 	private String executeJavadocsChecker(String repoFullName, String ref)
@@ -164,8 +158,12 @@ public class PullRequestProcessor {
 		return githubUser;
 	}
 
+	private String _getRepoFullName(PullRequest pullRequest) {
+		return pullRequest.getBase().getRepo().getOwner().getLogin() + "/" + pullRequest.getBase().getRepo().getName();
+	}
+
 	private String postMessage(
-			String repoFullName, String number, String message)
+			String repoFullName, int number, String message)
 		throws IOException {
 
 		StringBuilder url = new StringBuilder(5);
@@ -244,7 +242,7 @@ public class PullRequestProcessor {
 	}
 
 	private void tryToPostMessage(
-			int maxRetries, String repoFullName, String number, String message)
+			int maxRetries, String repoFullName, int number, String message)
 		throws IOException {
 
 		int retryCount = 0;
@@ -276,10 +274,7 @@ public class PullRequestProcessor {
 
 	private final int _RETRY_PERIOD_DEFAULT = 5;
 
-	private GithubPullRequest _pullRequest;
-	private String _pullRequestNumber;
-	private String _pullRequestRef;
-	private String _repoFullName;
+	private PullRequest _pullRequest;
 
 	// This is legacy and will be removed
 

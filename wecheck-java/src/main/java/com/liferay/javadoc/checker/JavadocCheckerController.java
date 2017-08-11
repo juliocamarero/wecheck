@@ -14,9 +14,6 @@
 package com.liferay.javadoc.checker;
 
 import com.liferay.javadoc.checker.github.GithubMessage;
-import com.liferay.javadoc.checker.github.GithubPullRequest;
-import com.liferay.javadoc.checker.github.GithubPullRequestHead;
-import com.liferay.javadoc.checker.github.GithubRepo;
 import com.liferay.javadoc.checker.processor.PullRequestProcessor;
 
 import java.util.logging.Logger;
@@ -40,7 +37,7 @@ public class JavadocCheckerController {
 	@RequestMapping(value = "/pull-request", method = RequestMethod.POST)
 	@ResponseBody
 	public String service(
-		@RequestHeader(value="HTTP_X_GITHUB_EVENT") String eventType,
+		@RequestHeader(value="X-Github-Event") String eventType,
 		@RequestBody GithubMessage githubMessage) {
 
 		LOGGER.info(
@@ -52,7 +49,7 @@ public class JavadocCheckerController {
 		if (githubMessage.isOpen()) {
 			PullRequestProcessor pullRequestProcessor =
 				new PullRequestProcessor(
-					githubMessage.getPull_request(), githubMessage.getNumber());
+					githubMessage.getPull_request());
 
 			try {
 				pullRequestProcessor.process();
