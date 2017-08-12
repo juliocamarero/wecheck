@@ -30,10 +30,13 @@ repositories {
 }
 
 dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+}
+
+dependencies {
 	compile('org.springframework.boot:spring-boot-starter-web')
 	compile group: 'org.json', name: 'json', version: '20090211'
 	compile group: 'commons-io', name: 'commons-io', version: '2.5'
-	compile group: 'org.eclipse.mylyn.github', name: 'org.eclipse.egit.github.core', version: '2.1.5'
 	compile group: 'org.eclipse.jgit', name: 'org.eclipse.jgit', version: '4.6.0.201612231935-r'
 	compile group: 'com.puppycrawl.tools', name: 'checkstyle', version: '7.5.1'
 
