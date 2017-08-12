@@ -3,18 +3,18 @@
 
 <module name="Checker">
 	<module name="TreeWalker">
-	<module name="JavadocType">
-	<property name="allowMissingParamTags" value="true" />
-		<property name="scope" value="public" />
-	</module>
-	<module name="JavadocMethod">
-	<property name="allowMissingParamTags" value="true" />
-		<property name="scope" value="public" />
-	</module>
-	<module name="JavadocStyle">
-		<property name="checkEmptyJavadoc" value="true" />
-		<property name="scope" value="public" />
-		<property name="tokens" value="INTERFACE_DEF, CLASS_DEF, METHOD_DEF" />
-	</module>
+		<module name="JavadocType">
+			<property name="allowMissingParamTags" value="true" />
+			<property name="scope" value="public" />
+		</module>
+		<module name="JavadocMethod">
+			<property name="allowMissingParamTags" value="true" />
+			<property name="scope" value="public" />
+		</module>
+		<module name="JavadocStyle">
+			<property name="checkEmptyJavadoc" value="true" />
+			<property name="scope" value="public" />
+			<property name="tokens" value="INTERFACE_DEF, CLASS_DEF, METHOD_DEF" />
+		</module>
 	</module>
 </module>
