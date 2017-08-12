@@ -13,6 +13,12 @@
  */
 package com.liferay.javadoc.checker.checkstyle;
 
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
+
 import java.io.File;
 import java.io.IOException;
 
@@ -27,6 +33,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
@@ -91,13 +100,57 @@ public class CheckStyleExecutor {
 			Files.readAllBytes(Paths.get(_outputXMLFile)),
 			StandardCharsets.UTF_8);
 
-		LOGGER.fine(reportXML);
+		try {
+			processXML();
+		}
+		catch (SAXException e) {
+			e.printStackTrace();
+		}
+		catch (ParserConfigurationException e) {
+			e.printStackTrace();
+		}
+
+		//LOGGER.fine(reportXML);
 
 		String reportHTML = transform();
 
-		LOGGER.fine(reportHTML);
+		//LOGGER.fine(reportHTML);
 
 		return reportHTML;
+	}
+
+	private void processXML()
+		throws IOException, SAXException, ParserConfigurationException {
+		DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+		DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+		Document doc = docBuilder.parse(_outputXMLFile);
+
+		NodeList list = doc.getElementsByTagName("file");
+
+		int totalFiles = list.getLength();
+
+		int correctfiles = 0;
+
+		int totalErrors = 0;
+
+		for (int i = 0; i < list.getLength(); i++) {
+			Node node = list.item(i);
+
+			NodeList errors = ((Element)node).getElementsByTagName("error");
+
+			if (errors.getLength() == 0) {
+				correctfiles++;
+			}
+			else {
+				totalErrors += errors.getLength();
+			}
+		}
+		
+		double percentage = ((double)correctfiles / (double)totalFiles) * 100;
+
+		System.out.println ("Files: " + totalFiles + " - correct: " + correctfiles);
+		System.out.println("Errors to fix: " + totalErrors);
+		System.out.println("Percentage: " + String.format("%.2f", percentage) + " %");
 	}
 
 	public void setConfigurationFile(String configurationFile) {
