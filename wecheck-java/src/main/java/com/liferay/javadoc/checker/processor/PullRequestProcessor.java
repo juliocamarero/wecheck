@@ -30,12 +30,12 @@ import javax.xml.transform.TransformerException;
 
 import org.apache.commons.io.FileUtils;
 
+import org.eclipse.egit.github.core.Repository;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import org.eclipse.egit.github.core.PullRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,7 +51,8 @@ public class PullRequestProcessor {
 		throws GitAPIException, InterruptedException, IOException,
 			JSONException, TransformerException {
 
-		String repoFullName = _getRepoFullName(pullRequest);
+		Repository repo = _getRepo(pullRequest);
+		String repoFullName = repo.generateId();
 
 		LOGGER.info(
 			"Processing Pull Request from " + repoFullName +
@@ -59,19 +60,15 @@ public class PullRequestProcessor {
 					pullRequest.getTitle());
 
 		if (printInitialMessage) {
-			JSONObject data = new JSONObject();
-
-			data.put("body", "Checking JavaDocs...");
-
 			_commentsClient.postMessage(
-				repoFullName, pullRequest.getNumber(),	data.toString());
+				repo, pullRequest.getNumber(),	"Checking your Javadocs...");
 		}
 
 		String message = executeJavadocsChecker(
 			repoFullName, pullRequest.getHead().getRef());
 
 		_commentsClient.postMessage(
-			repoFullName, pullRequest.getNumber(), message);
+			repo, pullRequest.getNumber(), message);
 	}
 
 	private String executeJavadocsChecker(String repoFullName, String ref)
@@ -106,25 +103,21 @@ public class PullRequestProcessor {
 
 		parameters.put("report-title", configurationReader.getReportTitle());
 
-		JSONObject data = new JSONObject();
-
 		CheckStyleExecutor checkStyleExecutor = new CheckStyleExecutor(
 			configurationReader.getIncludeDirectories(),
 			configurationReader.getExcludeDirectories(), parameters, true);
 
 		String message = checkStyleExecutor.execute();
 
-		data.put("body", message);
-
 		FileUtils.deleteDirectory(dir);
 
 		git.close();
 
-		return data.toString();
+		return message;
 	}
 
-	private String _getRepoFullName(PullRequest pullRequest) {
-		return pullRequest.getBase().getRepo().getOwner().getLogin() + "/" + pullRequest.getBase().getRepo().getName();
+	private Repository _getRepo(PullRequest pullRequest) {
+		return pullRequest.getBase().getRepo();
 	}
 
 	private static final Logger LOGGER = Logger.getLogger(
@@ -132,7 +125,7 @@ public class PullRequestProcessor {
 
 	// This is legacy and will be removed
 
-	private boolean printInitialMessage = true;
+	private boolean printInitialMessage = false;
 
 	@Autowired
 	private CredentialsManager _credentialsManager;

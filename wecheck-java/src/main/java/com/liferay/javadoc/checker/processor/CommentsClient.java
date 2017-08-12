@@ -13,15 +13,14 @@
  */
 package com.liferay.javadoc.checker.processor;
 
+import org.eclipse.egit.github.core.Comment;
+import org.eclipse.egit.github.core.Repository;
+import org.eclipse.egit.github.core.client.GitHubClient;
+import org.eclipse.egit.github.core.service.IssueService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.logging.Logger;
 
 /**
@@ -29,13 +28,13 @@ import java.util.logging.Logger;
  */
 @Service
 public class CommentsClient {
-	public String postMessage(
-			String repoFullName, int number, String message)
+	public Comment postMessage(
+		Repository repo, int number, String message)
 		throws IOException {
 
 		for (int retryCount = 1; retryCount <= _MAX_RETRIES; retryCount++) {
 			try {
-				return doPostMessage(repoFullName, number, message);
+				return doPostMessage(repo, number, message);
 			}
 			catch (IOException ioe) {
 				LOGGER.warning("Error when posting comment in github.");
@@ -55,69 +54,24 @@ public class CommentsClient {
 		return null; // Code should never reach this point
 	}
 
-	private String doPostMessage(
-			String repoFullName, int number, String message)
+	private Comment doPostMessage(
+			Repository repo, int number, String message)
 		throws IOException {
 
-		StringBuilder url = new StringBuilder(5);
+		GitHubClient gitHubClient = new GitHubClient();
+		gitHubClient.setCredentials(
+			_credentialsManager.getGithubUser(),
+			_credentialsManager.getGithubPassword());
 
-		url.append("https://api.github.com/repos/");
-		url.append(repoFullName);
-		url.append("/issues/");
-		url.append(number);
-		url.append("/comments");
+		IssueService service = new IssueService(gitHubClient);
 
-		URL urlObject = new URL(url.toString());
+		Comment comment = service.createComment(repo, number, message);
 
-		HttpURLConnection connection =
-			(HttpURLConnection)urlObject.openConnection();
+		LOGGER.info(
+			"Comment posted successfully to pull request " + number + " - " +
+				repo.generateId());
 
-		connection.setRequestMethod("POST");
-
-		connection.setRequestProperty(
-			"Authorization", _credentialsManager.getBasicAuthHeader());
-
-		connection.setRequestProperty("Content-Type", "application/json");
-
-		connection.setDoOutput(true);
-
-		OutputStreamWriter out = new OutputStreamWriter(
-			connection.getOutputStream());
-
-		out.write(message);
-		out.close();
-
-		int bytes = 0;
-		String line = null;
-
-		StringBuilder sb = new StringBuilder();
-
-		try (BufferedReader bufferedReader = new BufferedReader(
-				new InputStreamReader(connection.getInputStream()))) {
-
-			while ((line = bufferedReader.readLine()) != null) {
-				byte[] lineBytes = line.getBytes();
-
-				bytes += lineBytes.length;
-
-				if (bytes > (30 * 1024 * 1024)) {
-					sb.append("Response for ");
-					sb.append(url);
-					sb.append(" was truncated due to its size.");
-
-					break;
-				}
-
-				sb.append(line);
-				sb.append("\n");
-			}
-		}
-
-		String response = sb.toString();
-
-		LOGGER.info("Comment posted successfully to Github");
-
-		return response;
+		return comment;
 	}
 
 	private void sleep(long duration) {
