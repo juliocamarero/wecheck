@@ -16,6 +16,7 @@ package com.liferay.javadoc.checker.processor;
 import static java.util.Collections.singleton;
 
 import com.liferay.javadoc.checker.checkstyle.CheckStyleExecutor;
+import com.liferay.javadoc.checker.checkstyle.JavadocReport;
 import com.liferay.javadoc.checker.configuration.JavadocCheckerConfigurationReader;
 
 import java.io.File;
@@ -107,13 +108,13 @@ public class PullRequestProcessor {
 			configurationReader.getIncludeDirectories(),
 			configurationReader.getExcludeDirectories(), parameters, true);
 
-		String message = checkStyleExecutor.execute();
+		JavadocReport report = checkStyleExecutor.execute();
 
 		FileUtils.deleteDirectory(dir);
 
 		git.close();
 
-		return message;
+		return report.getHtml();
 	}
 
 	private Repository _getRepo(PullRequest pullRequest) {

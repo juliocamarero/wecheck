@@ -60,7 +60,7 @@ public class CheckStyleExecutor {
 		_XSLParameters = XSLParameters;
 	}
 
-	public String execute() throws IOException, TransformerException {
+	public JavadocReport execute() throws IOException, TransformerException {
 		List<String> arguments = new ArrayList<>();
 
 		arguments.add("-c");
@@ -96,12 +96,10 @@ public class CheckStyleExecutor {
 		CheckStyleCLIWrapper.main(
 			arguments.toArray(new String[arguments.size()]));
 
-		String reportXML = new String(
-			Files.readAllBytes(Paths.get(_outputXMLFile)),
-			StandardCharsets.UTF_8);
+		JavadocReport report = null;
 
 		try {
-			processXML();
+			report = processXML();
 		}
 		catch (SAXException e) {
 			e.printStackTrace();
@@ -110,26 +108,23 @@ public class CheckStyleExecutor {
 			e.printStackTrace();
 		}
 
-		//LOGGER.fine(reportXML);
-
-		String reportHTML = transform();
-
-		//LOGGER.fine(reportHTML);
-
-		return reportHTML;
+		return report;
 	}
 
-	private void processXML()
-		throws IOException, SAXException, ParserConfigurationException {
+	private JavadocReport processXML()
+		throws IOException, SAXException, ParserConfigurationException,
+		TransformerException {
 		DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
 		Document doc = docBuilder.parse(_outputXMLFile);
 
+		JavadocReport report = new JavadocReport();
+
 		NodeList list = doc.getElementsByTagName("file");
 
-		int totalFiles = list.getLength();
+		report.setTotalFiles(list.getLength());
 
-		int correctfiles = 0;
+		int totalCorrectFiles = 0;
 
 		int totalErrors = 0;
 
@@ -139,18 +134,31 @@ public class CheckStyleExecutor {
 			NodeList errors = ((Element)node).getElementsByTagName("error");
 
 			if (errors.getLength() == 0) {
-				correctfiles++;
+				totalCorrectFiles++;
 			}
 			else {
 				totalErrors += errors.getLength();
 			}
 		}
-		
-		double percentage = ((double)correctfiles / (double)totalFiles) * 100;
 
-		System.out.println ("Files: " + totalFiles + " - correct: " + correctfiles);
-		System.out.println("Errors to fix: " + totalErrors);
-		System.out.println("Percentage: " + String.format("%.2f", percentage) + " %");
+		report.setTotalCorrectFiles(totalCorrectFiles);
+		report.setTotalErrors(totalErrors);
+
+		String reportXML = new String(
+			Files.readAllBytes(Paths.get(_outputXMLFile)),
+			StandardCharsets.UTF_8);
+
+		report.setXml(reportXML);
+		//LOGGER.fine(reportXML);
+
+		String reportHTML = transform();
+
+		report.setHtml(reportHTML);
+		//LOGGER.fine(reportHTML);
+
+		LOGGER.fine(report.toString());
+
+		return report;
 	}
 
 	public void setConfigurationFile(String configurationFile) {
