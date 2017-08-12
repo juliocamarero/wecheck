@@ -12,13 +12,13 @@
 						</th>
 					</tr>
 					<tr>
-						<td>Classes and methods checked</td>
+						<td>Classes checked</td>
 						<td>
 							<xsl:number level="any" value="count(descendant::file)"/>
 						</td>
 					</tr>
 					<tr>
-						<td>Classes and methods with description</td>
+						<td>Classes fully correct documented</td>
 						<td>
 							<xsl:number level="any" value="count(descendant::file) - count(descendant::file[error])"/>
 						</td>
