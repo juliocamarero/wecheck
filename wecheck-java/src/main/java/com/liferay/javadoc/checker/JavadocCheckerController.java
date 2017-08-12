@@ -18,6 +18,7 @@ import com.liferay.javadoc.checker.processor.PullRequestProcessor;
 
 import java.util.logging.Logger;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -45,15 +46,14 @@ public class JavadocCheckerController {
 				githubMessage.getAction() + ")");
 
 		if (githubMessage.isValidAction()) {
-			PullRequestProcessor pullRequestProcessor =
-				new PullRequestProcessor(
-					githubMessage.getPull_request());
-
 			try {
-				pullRequestProcessor.process();
+				_pullRequestProcessor.process(
+					githubMessage.getPull_request());
 			}
 			catch (Exception e) {
-				LOGGER.severe(e.getMessage());
+				LOGGER.severe(e.getCause().getMessage());
+
+				e.printStackTrace();
 			}
 		}
 		else {
@@ -62,6 +62,9 @@ public class JavadocCheckerController {
 
 		return "SUCCESS";
 	}
+
+	@Autowired
+	private PullRequestProcessor _pullRequestProcessor;
 
 	private static final Logger LOGGER = Logger.getLogger(
 		JavadocCheckerController.class.getName());
