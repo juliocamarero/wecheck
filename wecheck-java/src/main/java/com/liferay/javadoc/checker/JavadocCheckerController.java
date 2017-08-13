@@ -67,7 +67,7 @@ public class JavadocCheckerController {
 
 	@RequestMapping(value = "/score", method = RequestMethod.GET)
 	@ResponseBody
-	public String score(
+	public double score(
 		@RequestParam String repoOwner,
 		@RequestParam String repoName,
 		@RequestParam String branch) {

@@ -15,6 +15,7 @@ package com.liferay.javadoc.checker.processor;
 
 import com.wedeploy.android.WeDeploy;
 import com.wedeploy.android.exception.WeDeployException;
+import com.wedeploy.android.query.SortOrder;
 import com.wedeploy.android.query.filter.Filter;
 import com.wedeploy.android.transport.Response;
 import org.json.JSONArray;
@@ -30,7 +31,6 @@ import java.util.Date;
  */
 @Service
 public class ScoreManager {
-
 	public String saveScore(
 			String repoOwner, String repoName, String branch, double score)
 		throws JSONException {
@@ -60,7 +60,7 @@ public class ScoreManager {
 		return "error";
 	}
 
-	public String getScore(String repoOwner, String repoName, String branch) {
+	public double getScore(String repoOwner, String repoName, String branch) {
 		WeDeploy weDeploy = new WeDeploy.Builder().build();
 
 		try {
@@ -72,14 +72,18 @@ public class ScoreManager {
 							Filter.field("repoOwner", repoOwner),
 							Filter.field("repoName", repoName),
 							Filter.field("branch", branch)))
-				.orderBy("time")
+				.orderBy("time", SortOrder.DESCENDING)
 				.limit(1)
 				.get("builds")
 				.execute();
 
 			JSONArray builds = new JSONArray(response.getBody());
 
-			return response.getBody();
+			if (builds.length() > 0) {
+				JSONObject build = builds.getJSONObject(0);
+
+				return build.getDouble("score");
+			}
 		}
 		catch (WeDeployException e) {
 			e.printStackTrace();
@@ -88,12 +92,8 @@ public class ScoreManager {
 			e.printStackTrace();
 		}
 
-		return "error";
-
+		return 0.0;
 	}
-
-
-
 
 	private final String _DB_SERVICE_URL = "https://db-wecheck.wedeploy.io";
 
