@@ -1,0 +1,34 @@
+[
+    {
+       "description": "Stores a new build result",
+       "path": "/builds",
+       "parameters": {
+           "repoOwner": {
+               "type": "string",
+               "required": true
+           },
+           "repoName": {
+               "type": "string",
+               "required": true
+           },
+           "branch": {
+              "type": "string",
+              "required": true
+          },
+           "score": {
+              "type": "double",
+              "required": true
+          },
+           "time": {
+             "type": "int",
+             "required": true
+         }
+       },
+       "data": true
+   },
+    {
+        "path": "/build/:id",
+        "data": true,
+        "method": "GET"
+    }
+]

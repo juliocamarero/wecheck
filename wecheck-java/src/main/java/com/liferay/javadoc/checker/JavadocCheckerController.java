@@ -18,12 +18,14 @@ import com.liferay.javadoc.checker.processor.PullRequestProcessor;
 
 import java.util.logging.Logger;
 
+import com.liferay.javadoc.checker.processor.ScoreManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 @Controller
 @RequestMapping("/github")
@@ -62,6 +64,19 @@ public class JavadocCheckerController {
 
 		return "SUCCESS";
 	}
+
+	@RequestMapping(value = "/score", method = RequestMethod.GET)
+	@ResponseBody
+	public String score(
+		@RequestParam String repoOwner,
+		@RequestParam String repoName,
+		@RequestParam String branch) {
+
+		return _scoreManager.getScore(repoOwner, repoName, branch);
+	}
+
+	@Autowired
+	private ScoreManager _scoreManager;
 
 	@Autowired
 	private PullRequestProcessor _pullRequestProcessor;

@@ -29,6 +29,8 @@ import java.util.logging.Logger;
 
 import javax.xml.transform.TransformerException;
 
+import com.wedeploy.android.WeDeploy;
+import com.wedeploy.android.exception.WeDeployException;
 import org.apache.commons.io.FileUtils;
 
 import org.eclipse.egit.github.core.Repository;
@@ -53,10 +55,9 @@ public class PullRequestProcessor {
 			JSONException, TransformerException {
 
 		Repository repo = _getRepo(pullRequest);
-		String repoFullName = repo.generateId();
 
 		LOGGER.info(
-			"Processing Pull Request from " + repoFullName +
+			"Processing Pull Request from " + repo.generateId() +
 				" - Number " + pullRequest.getNumber() + " : " +
 					pullRequest.getTitle());
 
@@ -66,29 +67,29 @@ public class PullRequestProcessor {
 		}
 
 		String message = executeJavadocsChecker(
-			repoFullName, pullRequest.getHead().getRef());
+			repo, pullRequest.getHead().getRef());
 
 		_commentsClient.postMessage(
 			repo, pullRequest.getNumber(), message);
 	}
 
-	private String executeJavadocsChecker(String repoFullName, String ref)
+	private String executeJavadocsChecker(Repository repo, String branch)
 		throws GitAPIException, InterruptedException, IOException,
 		JSONException, TransformerException {
 
 		Random random = new Random();
 
-		String folderName = ref + String.valueOf(random.nextLong());
+		String folderName = branch + String.valueOf(random.nextLong());
 		String projectDir = "/tmp/" + folderName;
 		File dir = new File(projectDir);
 
 		LOGGER.info("Clonning git Repo.");
 
 		Git git = Git.cloneRepository()
-		.setURI("https://github.com/" +repoFullName)
+		.setURI("https://github.com/" + repo.generateId())
 		.setDirectory(dir)
-		.setBranchesToClone(singleton("refs/heads/" + ref))
-		.setBranch("refs/heads/" + ref)
+		.setBranchesToClone(singleton("refs/heads/" + branch))
+		.setBranch("refs/heads/" + branch)
 		.setCredentialsProvider(
 			new UsernamePasswordCredentialsProvider(
 				_credentialsManager.getGithubUser(),
@@ -110,6 +111,10 @@ public class PullRequestProcessor {
 
 		JavadocReport report = checkStyleExecutor.execute();
 
+		_scoreManager.saveScore(
+			repo.getOwner().getLogin(), repo.getName(), branch,
+			report.getScore());
+
 		FileUtils.deleteDirectory(dir);
 
 		git.close();
@@ -127,6 +132,9 @@ public class PullRequestProcessor {
 	// This is legacy and will be removed
 
 	private boolean printInitialMessage = false;
+
+	@Autowired
+	private ScoreManager _scoreManager;
 
 	@Autowired
 	private CredentialsManager _credentialsManager;

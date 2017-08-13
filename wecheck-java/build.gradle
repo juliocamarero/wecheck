@@ -34,7 +34,8 @@ dependencies {
 }
 
 dependencies {
-	compile('org.springframework.boot:spring-boot-starter-web')
+	compile group: 'org.springframework.boot', name: 'spring-boot-starter-web'
+	compile group: 'com.wedeploy', name: 'com.wedeploy.android', version: '0.1.0'
 	compile group: 'org.json', name: 'json', version: '20090211'
 	compile group: 'commons-io', name: 'commons-io', version: '2.5'
 	compile group: 'org.eclipse.jgit', name: 'org.eclipse.jgit', version: '4.6.0.201612231935-r'
