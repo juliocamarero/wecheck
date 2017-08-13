@@ -67,6 +67,8 @@ public class PullRequestProcessor {
 
 		PullRequestMarker head = pullRequest.getHead();
 
+		_commitStatusManager.setStatusPending(repo, head.getSha());
+
 		String message = executeJavadocsChecker(
 			repo, head.getRef(), head.getSha());
 
@@ -113,9 +115,15 @@ public class PullRequestProcessor {
 
 		JavadocReport report = checkStyleExecutor.execute();
 
+		double baseScore = _scoreManager.getScore(
+			repo.getOwner().getLogin(), repo.getName(), branch);
+
 		_scoreManager.saveScore(
 			repo.getOwner().getLogin(), repo.getName(), branch, sha,
 			report.getScore());
+
+		_commitStatusManager.updateStatus(
+			repo, sha, baseScore, report.getScore());
 
 		FileUtils.deleteDirectory(dir);
 
@@ -134,6 +142,9 @@ public class PullRequestProcessor {
 	// This is legacy and will be removed
 
 	private boolean printInitialMessage = false;
+
+	@Autowired
+	private CommitStatusManager _commitStatusManager;
 
 	@Autowired
 	private ScoreManager _scoreManager;

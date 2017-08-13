@@ -29,7 +29,7 @@ import java.util.logging.Logger;
 @Service
 public class CommentsClient {
 	public Comment postMessage(
-		Repository repo, int number, String message)
+			Repository repo, int number, String message)
 		throws IOException {
 
 		for (int retryCount = 1; retryCount <= _MAX_RETRIES; retryCount++) {
