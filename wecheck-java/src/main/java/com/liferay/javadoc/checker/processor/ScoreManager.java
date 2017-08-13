@@ -32,7 +32,8 @@ import java.util.Date;
 @Service
 public class ScoreManager {
 	public String saveScore(
-			String repoOwner, String repoName, String branch, double score)
+			String repoOwner, String repoName, String branch, String sha,
+			double score)
 		throws JSONException {
 
 		JSONObject build = new JSONObject();
@@ -40,6 +41,7 @@ public class ScoreManager {
 		build.put("repoOwner", repoOwner);
 		build.put("repoName", repoName);
 		build.put("branch", branch);
+		build.put("sha", sha);
 		build.put("score", score);
 		build.put("time", new Date().getTime());
 

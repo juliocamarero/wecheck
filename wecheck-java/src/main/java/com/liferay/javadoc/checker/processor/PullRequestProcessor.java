@@ -29,10 +29,9 @@ import java.util.logging.Logger;
 
 import javax.xml.transform.TransformerException;
 
-import com.wedeploy.android.WeDeploy;
-import com.wedeploy.android.exception.WeDeployException;
 import org.apache.commons.io.FileUtils;
 
+import org.eclipse.egit.github.core.PullRequestMarker;
 import org.eclipse.egit.github.core.Repository;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -66,16 +65,19 @@ public class PullRequestProcessor {
 				repo, pullRequest.getNumber(),	"Checking your Javadocs...");
 		}
 
+		PullRequestMarker head = pullRequest.getHead();
+
 		String message = executeJavadocsChecker(
-			repo, pullRequest.getHead().getRef());
+			repo, head.getRef(), head.getSha());
 
 		_commentsClient.postMessage(
 			repo, pullRequest.getNumber(), message);
 	}
 
-	private String executeJavadocsChecker(Repository repo, String branch)
+	private String executeJavadocsChecker(
+			Repository repo, String branch, String sha)
 		throws GitAPIException, InterruptedException, IOException,
-		JSONException, TransformerException {
+			JSONException, TransformerException {
 
 		Random random = new Random();
 
@@ -112,7 +114,7 @@ public class PullRequestProcessor {
 		JavadocReport report = checkStyleExecutor.execute();
 
 		_scoreManager.saveScore(
-			repo.getOwner().getLogin(), repo.getName(), branch,
+			repo.getOwner().getLogin(), repo.getName(), branch, sha,
 			report.getScore());
 
 		FileUtils.deleteDirectory(dir);
