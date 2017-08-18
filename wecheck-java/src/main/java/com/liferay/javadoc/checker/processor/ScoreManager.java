@@ -13,6 +13,7 @@
  */
 package com.liferay.javadoc.checker.processor;
 
+import com.liferay.javadoc.checker.checkstyle.JavadocReport;
 import com.wedeploy.android.WeDeploy;
 import com.wedeploy.android.exception.WeDeployException;
 import com.wedeploy.android.query.SortOrder;
@@ -33,7 +34,7 @@ import java.util.Date;
 public class ScoreManager {
 	public String saveScore(
 			String repoOwner, String repoName, String branch, String sha,
-			double score)
+			double score, JavadocReport report)
 		throws JSONException {
 
 		JSONObject build = new JSONObject();
@@ -44,6 +45,7 @@ public class ScoreManager {
 		build.put("sha", sha);
 		build.put("score", score);
 		build.put("time", new Date().getTime());
+		build.put("files", new JSONArray(report.getFiles()));
 
 		WeDeploy weDeploy = new WeDeploy.Builder().build();
 

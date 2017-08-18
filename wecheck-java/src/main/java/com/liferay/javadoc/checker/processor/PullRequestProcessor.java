@@ -83,9 +83,8 @@ public class PullRequestProcessor {
 
 		Random random = new Random();
 
-		String folderName = branch + String.valueOf(random.nextLong());
-		String projectDir = "/tmp/" + folderName;
-		File dir = new File(projectDir);
+		String path = "/tmp/" + branch + String.valueOf(random.nextLong());
+		File dir = new File(path);
 
 		LOGGER.info("Clonning git Repo.");
 
@@ -103,7 +102,7 @@ public class PullRequestProcessor {
 		LOGGER.info("Executing checkStyle in repo.");
 
 		JavadocCheckerConfigurationReader configurationReader =
-			new JavadocCheckerConfigurationReader(projectDir);
+			new JavadocCheckerConfigurationReader(path);
 
 		Map<String, Object> parameters = new HashMap();
 
@@ -111,7 +110,8 @@ public class PullRequestProcessor {
 
 		CheckStyleExecutor checkStyleExecutor = new CheckStyleExecutor(
 			configurationReader.getIncludeDirectories(),
-			configurationReader.getExcludeDirectories(), parameters, true);
+			configurationReader.getExcludeDirectories(), parameters, true,
+			path);
 
 		JavadocReport report = checkStyleExecutor.execute();
 
@@ -120,7 +120,7 @@ public class PullRequestProcessor {
 
 		_scoreManager.saveScore(
 			repo.getOwner().getLogin(), repo.getName(), branch, sha,
-			report.getScore());
+			report.getScore(), report);
 
 		_commitStatusManager.updateStatus(
 			repo, sha, baseScore, report.getScore());

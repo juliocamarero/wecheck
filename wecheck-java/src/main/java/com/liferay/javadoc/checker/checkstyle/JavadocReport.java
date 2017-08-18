@@ -13,6 +13,9 @@
  */
 package com.liferay.javadoc.checker.checkstyle;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  *
  * @author Julio Camarero
@@ -20,6 +23,7 @@ package com.liferay.javadoc.checker.checkstyle;
 public class JavadocReport {
 
 	public JavadocReport() {
+		_files = new ArrayList<>();
 	}
 
 	public int getTotalFiles() {
@@ -81,11 +85,21 @@ public class JavadocReport {
 		return sb.toString();
 	}
 
+	public List<ReportFile> getFiles() {
+		return _files;
+	}
+
+	public void addReportFile(ReportFile file) {
+		_files.add(file);
+	}
+
 	private String _xml;
 	private String _html;
 
 	private int _totalFiles = 0;
 	private int _totalCorrectFiles = 0;
 	private int _totalErrors = 0;
+
+	private List<ReportFile> _files;
 
 }

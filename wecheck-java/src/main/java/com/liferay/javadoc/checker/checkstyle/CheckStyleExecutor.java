@@ -15,6 +15,7 @@ package com.liferay.javadoc.checker.checkstyle;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
@@ -31,6 +32,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.logging.Logger;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -50,7 +52,7 @@ public class CheckStyleExecutor {
 
 	public CheckStyleExecutor(
 		String[] includeDirectories, String[] excludeDirectories,
-		Map<String, Object> XSLParameters, boolean debug) {
+		Map<String, Object> XSLParameters, boolean debug, String path) {
 
 		_configurationFile = getResourceLocation(_configurationFileLocation);
 		_debug = debug;
@@ -58,6 +60,7 @@ public class CheckStyleExecutor {
 		_includeDirectories = includeDirectories;
 		_styleSheetFile = getResourceLocation(_styleSheetFileLocation);
 		_XSLParameters = XSLParameters;
+		_path = path;
 	}
 
 	public JavadocReport execute() throws IOException, TransformerException {
@@ -99,7 +102,9 @@ public class CheckStyleExecutor {
 		JavadocReport report = null;
 
 		try {
-			report = processXML();
+			LOGGER.fine("Generating report from Code Anaylisis.");
+
+			report = processXML(_path);
 		}
 		catch (SAXException e) {
 			e.printStackTrace();
@@ -111,34 +116,92 @@ public class CheckStyleExecutor {
 		return report;
 	}
 
-	private JavadocReport processXML()
+	private JavadocReport processXML(String path)
 		throws IOException, SAXException, ParserConfigurationException,
-		TransformerException {
+			TransformerException {
+
 		DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
 		Document doc = docBuilder.parse(_outputXMLFile);
 
 		JavadocReport report = new JavadocReport();
 
-		NodeList list = doc.getElementsByTagName("file");
+		NodeList files = doc.getElementsByTagName("file");
 
-		report.setTotalFiles(list.getLength());
+		report.setTotalFiles(files.getLength());
 
 		int totalCorrectFiles = 0;
 
 		int totalErrors = 0;
 
-		for (int i = 0; i < list.getLength(); i++) {
-			Node node = list.item(i);
+		for (int i = 0; i < files.getLength(); i++) {
+			Node node = files.item(i);
+			String nameValue = getAttribute(node, "name");
+
+			String fileName = nameValue.substring(
+				nameValue.lastIndexOf("/") + 1);
+
+			String filePath = nameValue.substring(
+				path.length(),
+				(nameValue.length() -fileName.length()));
+
+			ReportFile file = new ReportFile();
+
+			file.setName(fileName);
+			file.setPath(filePath);
 
 			NodeList errors = ((Element)node).getElementsByTagName("error");
 
 			if (errors.getLength() == 0) {
 				totalCorrectFiles++;
+
+				file.setStatus("ok");
 			}
 			else {
 				totalErrors += errors.getLength();
+
+				file.setStatus("error");
+
+				for (int j = 0; j < errors.getLength(); j++) {
+					Node errorNode = errors.item(j);
+
+					ReportError error = new ReportError();
+
+					String line = getAttribute(errorNode, "line");
+
+					if (!Objects.isNull(line)) {
+						error.setLine(Integer.parseInt(line));
+					}
+
+					String column = getAttribute(errorNode, "column");
+
+					if (!Objects.isNull(column)) {
+						error.setLine(Integer.parseInt(column));
+					}
+
+					String severity = getAttribute(errorNode, "severity");
+
+					if (!Objects.isNull(severity)) {
+						error.setSeverity(getAttribute(node, "severity"));
+					}
+
+					String message = getAttribute(errorNode, "message");
+
+					if (!Objects.isNull(message)) {
+						error.setMessage(getAttribute(node, "message"));
+					}
+
+					String source = getAttribute(errorNode, "source");
+
+					if (!Objects.isNull(source)) {
+						error.setSource(getAttribute(node, "source"));
+					}
+
+					file.addError(error);
+				}
 			}
+
+			report.addReportFile(file);
 		}
 
 		report.setTotalCorrectFiles(totalCorrectFiles);
@@ -159,6 +222,18 @@ public class CheckStyleExecutor {
 		LOGGER.fine(report.toString());
 
 		return report;
+	}
+
+	private String getAttribute(Node node, String atribute) {
+		NamedNodeMap attributesMap = node.getAttributes();
+
+		Node attributeNode = attributesMap.getNamedItem(atribute);
+
+		if (attributeNode == null) {
+			return null;
+		}
+
+		return attributeNode.getNodeValue();
 	}
 
 	public void setConfigurationFile(String configurationFile) {
@@ -225,5 +300,6 @@ public class CheckStyleExecutor {
 	private String _styleSheetFile;
 	private String _styleSheetFileLocation = "checkstyle/checkstyle.xsl";
 	private Map<String, Object> _XSLParameters;
+	private String _path;
 
 }
