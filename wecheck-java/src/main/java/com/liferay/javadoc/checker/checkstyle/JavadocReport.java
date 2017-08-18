@@ -54,7 +54,7 @@ public class JavadocReport {
 		return ((double)_totalCorrectFiles / (double)_totalFiles) * 100;
 	}
 
-	public String getXml() {
+	public String retrieveXml() {
 		return _xml;
 	}
 
@@ -62,7 +62,7 @@ public class JavadocReport {
 		_xml = xml;
 	}
 
-	public String getHtml() {
+	public String retrieveHtml() {
 		return _html;
 	}
 
@@ -93,13 +93,13 @@ public class JavadocReport {
 		_files.add(file);
 	}
 
+	// These fields are not converted to JSON because they don't have a get method
 	private String _xml;
 	private String _html;
 
 	private int _totalFiles = 0;
 	private int _totalCorrectFiles = 0;
 	private int _totalErrors = 0;
-
 	private List<ReportFile> _files;
 
 }

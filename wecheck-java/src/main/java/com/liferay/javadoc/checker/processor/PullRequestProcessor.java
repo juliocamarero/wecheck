@@ -129,7 +129,7 @@ public class PullRequestProcessor {
 
 		git.close();
 
-		return report.getHtml();
+		return report.retrieveHtml();
 	}
 
 	private Repository _getRepo(PullRequest pullRequest) {
