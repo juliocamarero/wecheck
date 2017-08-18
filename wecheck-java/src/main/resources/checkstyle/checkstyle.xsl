@@ -30,6 +30,12 @@
 						</td>
 					</tr>
 					<tr>
+						<td>Errors</td>
+						<td>
+							<xsl:number level="any" value="count(descendant::error)"/>
+						</td>
+					</tr>
+					<tr>
 						<td>Generation Date</td>
 						<td>
 							<dateTimeStamp>
