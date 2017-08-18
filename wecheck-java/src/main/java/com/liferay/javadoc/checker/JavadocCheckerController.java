@@ -14,30 +14,52 @@
 package com.liferay.javadoc.checker;
 
 import com.liferay.javadoc.checker.github.GithubMessage;
+import com.liferay.javadoc.checker.processor.BadgeManager;
 import com.liferay.javadoc.checker.processor.PullRequestProcessor;
 
+import java.io.IOException;
 import java.util.logging.Logger;
 
 import com.liferay.javadoc.checker.processor.ScoreManager;
+import org.json.JSONException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+
 @Controller
 @RequestMapping("/github")
 public class JavadocCheckerController {
 
-	@RequestMapping(value = "/test", method = RequestMethod.GET)
+	@GetMapping("/test")
 	@ResponseBody
 	public String hello() {
 		return "hello";
 	}
 
-	@RequestMapping(value = "/pull-request", method = RequestMethod.POST)
+	@GetMapping("/{repoOwner}/{repoName}/badge")
+	public String badge(
+			@PathVariable String repoOwner,
+			@PathVariable String repoName,
+			@RequestParam(required = false, defaultValue = "master")
+				String branch)
+
+		throws IOException, JSONException {
+
+		double score = _scoreManager.getScore(repoOwner, repoName, branch);;
+
+		String redirectUrl = _badgeManager.getBadgeURL(score);
+
+		return "redirect:" + redirectUrl;
+  	}
+
+	@PostMapping("/pull-request")
 	@ResponseBody
 	public String service(
 		@RequestHeader(value="X-Github-Event") String eventType,
@@ -65,15 +87,18 @@ public class JavadocCheckerController {
 		return "SUCCESS";
 	}
 
-	@RequestMapping(value = "/score", method = RequestMethod.GET)
+	@GetMapping("/{repoOwner}/{repoName}/score")
 	@ResponseBody
 	public double score(
-		@RequestParam String repoOwner,
-		@RequestParam String repoName,
-		@RequestParam String branch) {
+		@PathVariable String repoOwner,
+		@PathVariable String repoName,
+		@RequestParam(required = false, defaultValue = "master") String branch) {
 
 		return _scoreManager.getScore(repoOwner, repoName, branch);
 	}
+
+	@Autowired
+	private BadgeManager _badgeManager;
 
 	@Autowired
 	private ScoreManager _scoreManager;
