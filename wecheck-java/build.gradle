@@ -41,6 +41,8 @@ dependencies {
 	compile group: 'org.eclipse.jgit', name: 'org.eclipse.jgit', version: '4.6.0.201612231935-r'
 	compile group: 'com.puppycrawl.tools', name: 'checkstyle', version: '7.5.1'
 
+	runtime group: "org.springframework.boot", name: "spring-boot-starter-actuator", version: "1.4.3.RELEASE"
+
 	testCompile('org.springframework.boot:spring-boot-starter-test')
 }
 
