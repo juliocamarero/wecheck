@@ -182,19 +182,19 @@ public class CheckStyleExecutor {
 					String severity = getAttribute(errorNode, "severity");
 
 					if (!Objects.isNull(severity)) {
-						error.setSeverity(getAttribute(node, "severity"));
+						error.setSeverity(severity);
 					}
 
 					String message = getAttribute(errorNode, "message");
 
 					if (!Objects.isNull(message)) {
-						error.setMessage(getAttribute(node, "message"));
+						error.setMessage(message);
 					}
 
 					String source = getAttribute(errorNode, "source");
 
 					if (!Objects.isNull(source)) {
-						error.setSource(getAttribute(node, "source"));
+						error.setSource(source);
 					}
 
 					file.addError(error);
