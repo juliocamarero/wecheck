@@ -15,6 +15,7 @@ package com.liferay.javadoc.checker;
 
 import com.liferay.javadoc.checker.github.GithubMessage;
 import com.liferay.javadoc.checker.processor.BadgeManager;
+import com.liferay.javadoc.checker.processor.Build;
 import com.liferay.javadoc.checker.processor.BuildManager;
 import com.liferay.javadoc.checker.processor.PullRequestProcessor;
 
@@ -39,12 +40,12 @@ public class JavadocCheckerController {
 
 	@GetMapping("/test")
 	@ResponseBody
-	public String hello() {
+	public String test() {
 		return "hello";
 	}
 
 	@GetMapping("/{repoOwner}/{repoName}/badge")
-	public String badge(
+	public String getBadge(
 			@PathVariable String repoOwner,
 			@PathVariable String repoName,
 			@RequestParam(required = false, defaultValue = "master")
@@ -61,7 +62,7 @@ public class JavadocCheckerController {
 
 	@PostMapping("/pull-request")
 	@ResponseBody
-	public String service(
+	public String processPullRequestFromGithub(
 		@RequestHeader(value="X-Github-Event") String eventType,
 		@RequestBody GithubMessage githubMessage) {
 
@@ -89,12 +90,29 @@ public class JavadocCheckerController {
 
 	@GetMapping("/{repoOwner}/{repoName}/score")
 	@ResponseBody
-	public double score(
+	public double getScore(
 		@PathVariable String repoOwner,
 		@PathVariable String repoName,
 		@RequestParam(required = false, defaultValue = "master") String branch) {
 
 		return _buildManager.getScore(repoOwner, repoName, branch);
+	}
+
+	@GetMapping("/{repoOwner}/{repoName}/build")
+	@ResponseBody
+	public Build getLatestBuild(
+		@PathVariable String repoOwner,
+		@PathVariable String repoName,
+		@RequestParam(required = false, defaultValue = "master") String branch) {
+
+		return _buildManager.getBuild(repoOwner, repoName, branch);
+	}
+
+	@GetMapping("/build/{id}")
+	@ResponseBody
+	public Build getBuild(@PathVariable String id) {
+
+		return _buildManager.getBuild(id);
 	}
 
 	@Autowired

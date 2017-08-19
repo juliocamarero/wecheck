@@ -3,5 +3,10 @@
        "description": "Stores build results",
        "path": "/builds",
        "data": true
+   },
+   {
+       "path": "/builds/:id",
+       "data": true,
+       "method": "GET"
    }
 ]

@@ -118,6 +118,41 @@ public class BuildManager {
 		return null;
 	}
 
+	public Build getBuild(String id) {
+		WeDeploy weDeploy = new WeDeploy.Builder().build();
+
+		try {
+			LOGGER.fine("Obtaining latest build from WeDeploy DB.");
+
+			Response response =	weDeploy
+				.data(_DB_SERVICE_URL)
+				.get("builds/" + id)
+				.execute();
+
+			JSONObject buildJSON = new JSONObject(response.getBody());
+
+			LOGGER.fine("Build retrieved from WeDeploy DB: " + buildJSON);
+
+			return new Gson().fromJson(buildJSON.toString(), Build.class);
+		}
+		catch (WeDeployException e) {
+			LOGGER.severe(
+				"Unable to retrieve build from WeDeploy DB. Cause: " +
+					e.getMessage());
+
+			e.printStackTrace();
+		}
+		catch (JSONException e) {
+			LOGGER.severe(
+				"Unable to convert response to JSON. Cause: " +
+					e.getMessage());
+
+			e.printStackTrace();
+		}
+
+		return null;
+	}
+
 	public double getScore(String repoOwner, String repoName, String branch) {
 		Build build = getBuild(repoOwner, repoName, branch);
 
