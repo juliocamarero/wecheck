@@ -155,12 +155,12 @@ public class CheckStyleExecutor {
 			if (errors.getLength() == 0) {
 				totalCorrectFiles++;
 
-				file.setStatus("ok");
+				file.setStatus(ReportFile.STATUS_OK);
 			}
 			else {
 				totalErrors += errors.getLength();
 
-				file.setStatus("error");
+				file.setStatus(ReportFile.STATUS_ERROR);
 
 				for (int j = 0; j < errors.getLength(); j++) {
 					Node errorNode = errors.item(j);

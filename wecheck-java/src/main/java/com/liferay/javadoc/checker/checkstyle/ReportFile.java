@@ -22,6 +22,9 @@ import java.util.List;
  */
 public class ReportFile {
 
+	public static final String STATUS_OK = "ok";
+	public static final String STATUS_ERROR = "error";
+
 	public ReportFile() {
 		errors = new ArrayList<>();
 	}
