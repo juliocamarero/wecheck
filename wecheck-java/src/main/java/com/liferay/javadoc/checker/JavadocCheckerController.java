@@ -15,12 +15,12 @@ package com.liferay.javadoc.checker;
 
 import com.liferay.javadoc.checker.github.GithubMessage;
 import com.liferay.javadoc.checker.processor.BadgeManager;
+import com.liferay.javadoc.checker.processor.BuildManager;
 import com.liferay.javadoc.checker.processor.PullRequestProcessor;
 
 import java.io.IOException;
 import java.util.logging.Logger;
 
-import com.liferay.javadoc.checker.processor.ScoreManager;
 import org.json.JSONException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -52,7 +52,7 @@ public class JavadocCheckerController {
 
 		throws IOException, JSONException {
 
-		double score = _scoreManager.getScore(repoOwner, repoName, branch);;
+		double score = _buildManager.getScore(repoOwner, repoName, branch);;
 
 		String redirectUrl = _badgeManager.getBadgeURL(score);
 
@@ -94,14 +94,14 @@ public class JavadocCheckerController {
 		@PathVariable String repoName,
 		@RequestParam(required = false, defaultValue = "master") String branch) {
 
-		return _scoreManager.getScore(repoOwner, repoName, branch);
+		return _buildManager.getScore(repoOwner, repoName, branch);
 	}
 
 	@Autowired
 	private BadgeManager _badgeManager;
 
 	@Autowired
-	private ScoreManager _scoreManager;
+	private BuildManager _buildManager;
 
 	@Autowired
 	private PullRequestProcessor _pullRequestProcessor;

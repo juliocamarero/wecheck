@@ -34,7 +34,15 @@ public class CommitStatusManager {
 	}
 
 	public CommitStatus updateStatus(
-		Repository repo, String sha, double baseScore, double headScore) {
+		Repository repo, String sha, Build baseBuild, Build headBuild) {
+
+		double baseScore = 0;
+
+		if (baseBuild != null) {
+			baseScore = baseBuild.getScore();
+		}
+
+		double headScore = headBuild.getScore();
 
 		if (headScore == baseScore) {
 		    String description = String.format(

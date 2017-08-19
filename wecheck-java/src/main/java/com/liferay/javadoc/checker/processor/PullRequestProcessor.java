@@ -115,15 +115,20 @@ public class PullRequestProcessor {
 
 		JavadocReport report = checkStyleExecutor.execute();
 
-		double baseScore = _scoreManager.getScore(
+		Build baseBuild = _buildManager.getBuild(
 			repo.getOwner().getLogin(), repo.getName(), branch);
 
-		_scoreManager.saveScore(
-			repo.getOwner().getLogin(), repo.getName(), branch, sha,
-			report.getScore(), report);
+		Build headBuild = new Build();
+
+		headBuild.setBranch(branch);
+		headBuild.setRepoOwner(repo.getOwner().getLogin());
+		headBuild.setRepoName(repo.getName());
+		headBuild.setJavadocReport(report);
+
+		_buildManager.saveBuild(headBuild);
 
 		_commitStatusManager.updateStatus(
-			repo, sha, baseScore, report.getScore());
+			repo, sha, baseBuild, headBuild);
 
 		FileUtils.deleteDirectory(dir);
 
@@ -147,7 +152,7 @@ public class PullRequestProcessor {
 	private CommitStatusManager _commitStatusManager;
 
 	@Autowired
-	private ScoreManager _scoreManager;
+	private BuildManager _buildManager;
 
 	@Autowired
 	private CredentialsManager _credentialsManager;

@@ -13,7 +13,7 @@
  */
 package com.liferay.javadoc.checker.processor;
 
-import com.liferay.javadoc.checker.checkstyle.JavadocReport;
+import com.google.gson.Gson;
 import com.wedeploy.android.WeDeploy;
 import com.wedeploy.android.exception.WeDeployException;
 import com.wedeploy.android.query.SortOrder;
@@ -24,50 +24,56 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
+import java.util.logging.Logger;
+
 
 /**
  *
  * @author Julio Camarero
  */
 @Service
-public class ScoreManager {
-	public String saveScore(
-			String repoOwner, String repoName, String branch, String sha,
-			double score, JavadocReport report)
+public class BuildManager {
+	public String saveBuild(Build build)
 		throws JSONException {
-
-		JSONObject build = new JSONObject();
-
-		build.put("repoOwner", repoOwner);
-		build.put("repoName", repoName);
-		build.put("branch", branch);
-		build.put("sha", sha);
-		build.put("score", score);
-		build.put("time", new Date().getTime());
-		build.put("files", new JSONArray(report.getFiles()));
 
 		WeDeploy weDeploy = new WeDeploy.Builder().build();
 
 		try {
+			Gson gson = new Gson();
+
+			String buildGson = gson.toJson(build);
+
+			LOGGER.fine(
+				"GSON deserialized: " +  buildGson);
+
+			JSONObject buildJSON = new JSONObject(buildGson);
+
+			LOGGER.fine(
+				"Storing build in WeDeploy DB: " +  buildJSON.toString());
+
 			Response response = weDeploy
 				.data(_DB_SERVICE_URL)
-				.create("builds", build)
+				.create("builds", buildJSON)
 				.execute();
 
 			return response.getBody();
 		}
 		catch (WeDeployException e) {
+			LOGGER.severe(
+				"Unable to store in WeDeploy DB. Cause: " + e.getMessage());
+
 			e.printStackTrace();
 		}
 
 		return "error";
 	}
 
-	public double getScore(String repoOwner, String repoName, String branch) {
+	public Build getBuild(String repoOwner, String repoName, String branch) {
 		WeDeploy weDeploy = new WeDeploy.Builder().build();
 
 		try {
+			LOGGER.fine("Obtaining latest build from WeDeploy DB.");
+
 			Response response =	weDeploy
 				.data(_DB_SERVICE_URL)
 				.where(
@@ -84,20 +90,42 @@ public class ScoreManager {
 			JSONArray builds = new JSONArray(response.getBody());
 
 			if (builds.length() > 0) {
-				JSONObject build = builds.getJSONObject(0);
+				JSONObject buildJSON = builds.getJSONObject(0);
 
-				return build.getDouble("score");
+				LOGGER.fine("Build retrieved from WeDeploy DB: " + buildJSON);
+
+				return new Gson().fromJson(buildJSON.toString(), Build.class);
+			}
+			else {
+				LOGGER.fine("No Build found in WeDeploy DB.");
 			}
 		}
 		catch (WeDeployException e) {
+			LOGGER.severe(
+				"Unable to retrieve build from WeDeploy DB. Cause: " +
+					e.getMessage());
+
 			e.printStackTrace();
 		}
 		catch (JSONException e) {
+			LOGGER.severe(
+				"Unable to convert response to JSON. Cause: " +
+					e.getMessage());
+
 			e.printStackTrace();
 		}
 
-		return 0.0;
+		return null;
 	}
+
+	public double getScore(String repoOwner, String repoName, String branch) {
+		Build build = getBuild(repoOwner, repoName, branch);
+
+		return build.getScore();
+	}
+
+	private static final Logger LOGGER = Logger.getLogger(
+		BuildManager.class.getName());
 
 	private final String _DB_SERVICE_URL = "https://db-wecheck.wedeploy.io";
 
