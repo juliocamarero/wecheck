@@ -23,49 +23,49 @@ public class ReportError {
 	}
 
 	public int getLine() {
-		return _line;
+		return line;
 	}
 
 	public void setLine(int line) {
-		_line = line;
+		this.line = line;
 	}
 
 	public int getColumn() {
-		return _column;
+		return column;
 	}
 
 	public void setColumn(int column) {
-		_column = column;
+		this.column = column;
 	}
 
 	public String getSeverity() {
-		return _severity;
+		return severity;
 	}
 
 	public void setSeverity(String severity) {
-		_severity = severity;
+		this.severity = severity;
 	}
 
 	public String getMessage() {
-		return _message;
+		return message;
 	}
 
 	public void setMessage(String message) {
-		_message = message;
+		this.message = message;
 	}
 
 	public String getSource() {
-		return _source;
+		return source;
 	}
 
 	public void setSource(String source) {
-		_source = source;
+		this.source = source;
 	}
 
-	private int _line;
-	private int _column;
-	private String _severity;
-	private String _message;
-	private String _source;
+	private int line;
+	private int column;
+	private String severity;
+	private String message;
+	private String source;
 
 }

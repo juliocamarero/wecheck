@@ -23,43 +23,43 @@ import java.util.List;
 public class ReportFile {
 
 	public ReportFile() {
-		_errors = new ArrayList<>();
+		errors = new ArrayList<>();
 	}
 
 	public void addError(ReportError error) {
-		_errors.add(error);
+		errors.add(error);
 	}
 
 	public String getPath() {
-		return _path;
+		return path;
 	}
 
 	public void setPath(String path) {
-		_path = path;
+		this.path = path;
 	}
 
 	public String getName() {
-		return _name;
+		return name;
 	}
 
 	public void setName(String name) {
-		_name = name;
+		this.name = name;
 	}
 
 	public String getStatus() {
-		return _status;
+		return status;
 	}
 
 	public void setStatus(String status) {
-		_status = status;
+		this.status = status;
 	}
 
 	public List<ReportError> getErrors() {
-		return _errors;
+		return errors;
 	}
 
-	private String _path;
-	private String _name;
-	private String _status;
-	private List<ReportError> _errors;
+	private String path;
+	private String name;
+	private String status;
+	private List<ReportError> errors;
 }

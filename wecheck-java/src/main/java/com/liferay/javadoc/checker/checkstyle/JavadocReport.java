@@ -23,35 +23,35 @@ import java.util.List;
 public class JavadocReport {
 
 	public JavadocReport() {
-		_files = new ArrayList<>();
+		files = new ArrayList<>();
 	}
 
 	public int getTotalFiles() {
-		return _totalFiles;
+		return totalFiles;
 	}
 
 	public void setTotalFiles(int totalFiles) {
-		_totalFiles = totalFiles;
+		this.totalFiles = totalFiles;
 	}
 
 	public int getTotalCorrectFiles() {
-		return _totalCorrectFiles;
+		return totalCorrectFiles;
 	}
 
 	public void setTotalCorrectFiles(int totalCorrectFiles) {
-		_totalCorrectFiles = totalCorrectFiles;
+		this.totalCorrectFiles = totalCorrectFiles;
 	}
 
 	public int getTotalErrors() {
-		return _totalErrors;
+		return totalErrors;
 	}
 
 	public void setTotalErrors(int totalErrors) {
-		_totalErrors = totalErrors;
+		this.totalErrors = totalErrors;
 	}
 
 	public double getScore() {
-		return ((double)_totalCorrectFiles / (double)_totalFiles) * 100;
+		return ((double) totalCorrectFiles / (double) totalFiles) * 100;
 	}
 
 	public String retrieveXml() {
@@ -73,33 +73,33 @@ public class JavadocReport {
 	public String toString() {
 		StringBuilder sb = new StringBuilder(9);
 		sb.append("Correct Files: ");
-		sb.append(_totalCorrectFiles);
+		sb.append(totalCorrectFiles);
 		sb.append("/");
-		sb.append(_totalFiles);
+		sb.append(totalFiles);
 		sb.append(" (");
 		sb.append(String.format("%.2f", getScore()));
 		sb.append(") - ");
-		sb.append(_totalErrors);
+		sb.append(totalErrors);
 		sb.append(" errors");
 
 		return sb.toString();
 	}
 
 	public List<ReportFile> getFiles() {
-		return _files;
+		return files;
 	}
 
 	public void addReportFile(ReportFile file) {
-		_files.add(file);
+		files.add(file);
 	}
 
 	// These fields are not converted to JSON because they don't have a get method
-	private String _xml;
-	private String _html;
+	private transient String _xml;
+	private transient String _html;
 
-	private int _totalFiles = 0;
-	private int _totalCorrectFiles = 0;
-	private int _totalErrors = 0;
-	private List<ReportFile> _files;
+	private int totalFiles = 0;
+	private int totalCorrectFiles = 0;
+	private int totalErrors = 0;
+	private List<ReportFile> files;
 
 }
