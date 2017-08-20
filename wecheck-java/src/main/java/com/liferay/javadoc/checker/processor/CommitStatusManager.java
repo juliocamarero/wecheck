@@ -13,6 +13,7 @@
  */
 package com.liferay.javadoc.checker.processor;
 
+import com.liferay.javadoc.checker.model.Build;
 import org.eclipse.egit.github.core.CommitStatus;
 import org.eclipse.egit.github.core.Repository;
 import org.eclipse.egit.github.core.client.GitHubClient;
@@ -21,6 +22,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.logging.Logger;
 
 /**
@@ -29,56 +32,102 @@ import java.util.logging.Logger;
 @Service
 public class CommitStatusManager {
 	public CommitStatus setStatusPending(Repository repo, String sha) {
-		return doUpdateStatus(
-			repo, sha, CommitStatus.STATE_PENDING, "Calculating javadocs...");
+		CommitStatus commitStatus = createCommitStatus(
+			CommitStatus.STATE_PENDING, "Calculating javadocs...");
+
+		return doUpdateStatus(repo, sha, commitStatus);
 	}
 
 	public CommitStatus updateStatus(
 		Repository repo, String sha, Build baseBuild, Build headBuild) {
 
-		double baseScore = 0;
+		CommitStatus commitStatus = createCommitStatus(baseBuild, headBuild);
 
-		if (baseBuild != null) {
-			baseScore = baseBuild.getScore();
+		return doUpdateStatus(repo, sha, commitStatus);
+	}
+
+	protected double round(double value, int places) {
+	    if (places < 0) {
+	    	throw new IllegalArgumentException();
 		}
 
-		double headScore = headBuild.getScore();
+	    BigDecimal bd = new BigDecimal(value);
+
+	    bd = bd.setScale(places, RoundingMode.HALF_UP);
+
+	    return bd.doubleValue();
+	}
+
+	protected CommitStatus createCommitStatus(Build baseBuild, Build headBuild) {
+		double baseScore = 0;
+		int baseErrors = 99999;
+
+		if (baseBuild != null) {
+			baseScore = round(baseBuild.getScore(), 2);
+			baseErrors = baseBuild.getErrors();
+		}
+
+		double headScore = round(headBuild.getScore(), 2);
+		int headErrors = headBuild.getErrors();
 
 		if (headScore == baseScore) {
-		    String description = String.format(
-		    	"Javadocs remained the same: %.2f%%", headScore);
+			if (baseErrors == headErrors) {
+				String description = String.format(
+					"Javadocs remained the same: %.2f%%", headScore);
 
-			return doUpdateStatus(
-				repo, sha, CommitStatus.STATE_SUCCESS, description);
+				return createCommitStatus(
+					CommitStatus.STATE_SUCCESS, description);
+			}
+			else if (headErrors > baseErrors) {
+				String description = String.format(
+					"Javadocs errors increased (%s) to %s",
+					(headErrors - baseErrors), headErrors);
+
+				return createCommitStatus(
+					CommitStatus.STATE_FAILURE, description);
+			}
+			else {
+				String description = String.format(
+					"Javadocs errors decreased (%s) to %s",
+					(baseErrors - headErrors), headErrors);
+
+				return createCommitStatus(
+					CommitStatus.STATE_SUCCESS, description);
+			}
 		}
 		else if (headScore > baseScore){
 			String description = String.format(
-				"Javadocs increased (%.2f%%) to %.2f%%", (headScore - baseScore),
-					headScore);
-			
-			return doUpdateStatus(
-				repo, sha, CommitStatus.STATE_SUCCESS, description);
+				"Javadocs increased (%.2f%%) to %.2f%% (%s errors)",
+				(headScore - baseScore), headScore, headErrors);
+
+			return createCommitStatus(
+				CommitStatus.STATE_SUCCESS, description);
 		}
 
 		String description = String.format(
-			"Javadocs decreased (%.2f%%) to %.2f%%", (baseScore - headScore),
-				headScore);
+			"Javadocs decreased (%.2f%%) to %.2f%% (%s errors)", (baseScore - headScore),
+				headScore, headErrors);
 
-		return doUpdateStatus(repo, sha, CommitStatus.STATE_FAILURE, description);
+		return createCommitStatus(CommitStatus.STATE_FAILURE, description);
+	}
+
+	protected CommitStatus createCommitStatus(String state, String description) {
+		CommitStatus commitStatus = new CommitStatus();
+
+		commitStatus.setContext("WeCheck :D");
+		commitStatus.setDescription(description);
+		commitStatus.setState(state);
+
+		return commitStatus;
 	}
 
 	private CommitStatus doUpdateStatus(
-			Repository repo, String sha, String state, String description) {
+			Repository repo, String sha, CommitStatus commitStatus) {
 
 		GitHubClient gitHubClient = new GitHubClient();
 		gitHubClient.setCredentials(
 			_credentialsManager.getGithubUser(),
 			_credentialsManager.getGithubPassword());
-
-		CommitStatus commitStatus = new CommitStatus();
-		commitStatus.setContext("WeCheck :D");
-		commitStatus.setDescription(description);
-		commitStatus.setState(state);
 
 		CommitService commitService = new CommitService(gitHubClient);
 
