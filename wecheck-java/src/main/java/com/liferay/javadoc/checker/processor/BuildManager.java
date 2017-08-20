@@ -33,6 +33,10 @@ import java.util.logging.Logger;
  */
 @Service
 public class BuildManager {
+	/*
+	 * Returns the ID of the Build
+	 */
+
 	public String saveBuild(Build build)
 		throws JSONException {
 
@@ -56,7 +60,9 @@ public class BuildManager {
 				.create("builds", buildJSON)
 				.execute();
 
-			return response.getBody();
+			JSONObject responseBuild = new JSONObject(response.getBody());
+
+			return responseBuild.getString("id");
 		}
 		catch (WeDeployException e) {
 			LOGGER.severe(
