@@ -86,6 +86,15 @@ public class Build {
 		this.javadocReport = javadocReport;
 	}
 
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
+	}
+
+	private String id;
 	private String repoOwner;
 	private String repoName;
 	private String branch;

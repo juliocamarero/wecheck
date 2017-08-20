@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.Objects;
 import java.util.logging.Logger;
 
 /**
@@ -33,7 +34,7 @@ import java.util.logging.Logger;
 public class CommitStatusManager {
 	public CommitStatus setStatusPending(Repository repo, String sha) {
 		CommitStatus commitStatus = createCommitStatus(
-			CommitStatus.STATE_PENDING, "Calculating javadocs...");
+			CommitStatus.STATE_PENDING, "Calculating javadocs...", null);
 
 		return doUpdateStatus(repo, sha, commitStatus);
 	}
@@ -58,7 +59,9 @@ public class CommitStatusManager {
 	    return bd.doubleValue();
 	}
 
-	protected CommitStatus createCommitStatus(Build baseBuild, Build headBuild) {
+	protected CommitStatus createCommitStatus(
+		Build baseBuild, Build headBuild) {
+
 		double baseScore = 0;
 		int baseErrors = 99999;
 
@@ -76,7 +79,8 @@ public class CommitStatusManager {
 					"Javadocs remained the same: %.2f%%", headScore);
 
 				return createCommitStatus(
-					CommitStatus.STATE_SUCCESS, description);
+					CommitStatus.STATE_SUCCESS, description,
+					_buildManager.getBuildURL(headBuild));
 			}
 			else if (headErrors > baseErrors) {
 				String description = String.format(
@@ -84,7 +88,8 @@ public class CommitStatusManager {
 					(headErrors - baseErrors), headErrors);
 
 				return createCommitStatus(
-					CommitStatus.STATE_FAILURE, description);
+					CommitStatus.STATE_FAILURE, description,
+					_buildManager.getBuildURL(headBuild));
 			}
 			else {
 				String description = String.format(
@@ -92,7 +97,8 @@ public class CommitStatusManager {
 					(baseErrors - headErrors), headErrors);
 
 				return createCommitStatus(
-					CommitStatus.STATE_SUCCESS, description);
+					CommitStatus.STATE_SUCCESS, description,
+					_buildManager.getBuildURL(headBuild));
 			}
 		}
 		else if (headScore > baseScore){
@@ -101,28 +107,37 @@ public class CommitStatusManager {
 				(headScore - baseScore), headScore, headErrors);
 
 			return createCommitStatus(
-				CommitStatus.STATE_SUCCESS, description);
+				CommitStatus.STATE_SUCCESS, description,
+				_buildManager.getBuildURL(headBuild));
 		}
 
 		String description = String.format(
-			"Javadocs decreased (%.2f%%) to %.2f%% (%s errors)", (baseScore - headScore),
-				headScore, headErrors);
+			"Javadocs decreased (%.2f%%) to %.2f%% (%s errors)",
+			(baseScore - headScore), headScore, headErrors);
 
-		return createCommitStatus(CommitStatus.STATE_FAILURE, description);
+		return createCommitStatus(
+			CommitStatus.STATE_FAILURE, description,
+			_buildManager.getBuildURL(headBuild));
 	}
 
-	protected CommitStatus createCommitStatus(String state, String description) {
+	protected CommitStatus createCommitStatus(
+		String state, String description, String url) {
+
 		CommitStatus commitStatus = new CommitStatus();
 
 		commitStatus.setContext("WeCheck :D");
 		commitStatus.setDescription(description);
 		commitStatus.setState(state);
 
+		if (!Objects.isNull(url)){
+			commitStatus.setUrl(url);
+		}
+
 		return commitStatus;
 	}
 
 	private CommitStatus doUpdateStatus(
-			Repository repo, String sha, CommitStatus commitStatus) {
+		Repository repo, String sha, CommitStatus commitStatus) {
 
 		GitHubClient gitHubClient = new GitHubClient();
 		gitHubClient.setCredentials(
@@ -149,6 +164,10 @@ public class CommitStatusManager {
 
 	private static final Logger LOGGER = Logger.getLogger(
 		CommitStatusManager.class.getName());
+
+
+	@Autowired
+	private BuildManager _buildManager;
 
 	@Autowired
 	private CredentialsManager _credentialsManager;

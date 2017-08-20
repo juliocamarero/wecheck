@@ -14,6 +14,7 @@
 package com.liferay.javadoc.checker.processor;
 
 import com.google.gson.Gson;
+import com.liferay.javadoc.checker.controller.ReposController;
 import com.liferay.javadoc.checker.model.Build;
 import com.wedeploy.android.WeDeploy;
 import com.wedeploy.android.exception.WeDeployException;
@@ -38,7 +39,7 @@ public class BuildManager {
 	 * Returns the ID of the Build
 	 */
 
-	public String saveBuild(Build build)
+	public Build saveBuild(Build build)
 		throws JSONException {
 
 		WeDeploy weDeploy = new WeDeploy.Builder().build();
@@ -63,7 +64,7 @@ public class BuildManager {
 
 			JSONObject responseBuild = new JSONObject(response.getBody());
 
-			return responseBuild.getString("id");
+			return gson.fromJson(responseBuild.toString(), Build.class);
 		}
 		catch (WeDeployException e) {
 			LOGGER.severe(
@@ -72,7 +73,7 @@ public class BuildManager {
 			e.printStackTrace();
 		}
 
-		return "error";
+		return null;
 	}
 
 	public Build getBuild(String repoOwner, String repoName, String branch) {
@@ -160,6 +161,21 @@ public class BuildManager {
 		return null;
 	}
 
+	public String getBuildURL(Build build) {
+		StringBuilder sb = new StringBuilder(8);
+
+		sb.append(_API_URL);
+		sb.append(ReposController.REPO_ROOT_PATH);
+		sb.append("/");
+		sb.append(build.getRepoOwner());
+		sb.append("/");
+		sb.append(build.getRepoName());
+		sb.append("/build/");
+		sb.append(build.getId());
+
+		return sb.toString();
+	}
+
 	public double getScore(String repoOwner, String repoName, String branch) {
 		Build build = getBuild(repoOwner, repoName, branch);
 
@@ -170,5 +186,6 @@ public class BuildManager {
 		BuildManager.class.getName());
 
 	private final String _DB_SERVICE_URL = "https://db-wecheck.wedeploy.io";
+	private final String _API_URL = "https://api-wecheck.wedeploy.io";
 
 }
