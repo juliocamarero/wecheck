@@ -35,10 +35,10 @@ import java.util.logging.Logger;
  */
 @Service
 public class BuildManager {
+
 	/*
 	 * Returns the ID of the Build
 	 */
-
 	public Build saveBuild(Build build)
 		throws JSONException {
 
