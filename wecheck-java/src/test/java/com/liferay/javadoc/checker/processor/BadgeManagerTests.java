@@ -1,4 +1,4 @@
-package com.liferay.javadoc.checker;
+package com.liferay.javadoc.checker.processor;
 
 import com.liferay.javadoc.checker.processor.BadgeManager;
 import org.json.JSONException;
