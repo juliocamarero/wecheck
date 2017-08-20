@@ -126,7 +126,7 @@ public class PullRequestProcessor {
 		headBuild.setRepoName(repo.getName());
 		headBuild.setJavadocReport(report);
 
-		String buildId = _buildManager.saveBuild(headBuild);
+		headBuild = _buildManager.saveBuild(headBuild);
 
 		_commitStatusManager.updateStatus(
 			repo, sha, baseBuild, headBuild);
