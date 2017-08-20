@@ -14,6 +14,7 @@
 package com.liferay.javadoc.checker.processor;
 
 import com.google.gson.Gson;
+import com.liferay.javadoc.checker.model.Build;
 import com.wedeploy.android.WeDeploy;
 import com.wedeploy.android.exception.WeDeployException;
 import com.wedeploy.android.query.SortOrder;

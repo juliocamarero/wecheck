@@ -15,7 +15,7 @@ package com.liferay.javadoc.checker;
 
 import com.liferay.javadoc.checker.github.GithubMessage;
 import com.liferay.javadoc.checker.processor.BadgeManager;
-import com.liferay.javadoc.checker.processor.Build;
+import com.liferay.javadoc.checker.model.Build;
 import com.liferay.javadoc.checker.processor.BuildManager;
 import com.liferay.javadoc.checker.processor.PullRequestProcessor;
 

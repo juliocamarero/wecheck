@@ -1,10 +1,10 @@
 package com.liferay.javadoc.checker;
 
 import com.google.gson.Gson;
-import com.liferay.javadoc.checker.checkstyle.JavadocReport;
-import com.liferay.javadoc.checker.checkstyle.ReportError;
-import com.liferay.javadoc.checker.checkstyle.ReportFile;
-import com.liferay.javadoc.checker.processor.Build;
+import com.liferay.javadoc.checker.model.JavadocReport;
+import com.liferay.javadoc.checker.model.ReportError;
+import com.liferay.javadoc.checker.model.ReportFile;
+import com.liferay.javadoc.checker.model.Build;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;

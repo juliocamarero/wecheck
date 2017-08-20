@@ -13,6 +13,9 @@
  */
 package com.liferay.javadoc.checker.checkstyle;
 
+import com.liferay.javadoc.checker.model.JavadocReport;
+import com.liferay.javadoc.checker.model.ReportError;
+import com.liferay.javadoc.checker.model.ReportFile;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
