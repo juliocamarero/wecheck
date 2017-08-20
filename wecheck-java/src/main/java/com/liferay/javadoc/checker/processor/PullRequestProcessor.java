@@ -16,7 +16,8 @@ package com.liferay.javadoc.checker.processor;
 import static java.util.Collections.singleton;
 
 import com.liferay.javadoc.checker.checkstyle.CheckStyleExecutor;
-import com.liferay.javadoc.checker.checkstyle.JavadocReport;
+import com.liferay.javadoc.checker.model.Build;
+import com.liferay.javadoc.checker.model.JavadocReport;
 import com.liferay.javadoc.checker.configuration.JavadocCheckerConfigurationReader;
 
 import java.io.File;
@@ -158,6 +159,6 @@ public class PullRequestProcessor {
 	private CredentialsManager _credentialsManager;
 
 	@Autowired
-	private CommentsClient _commentsClient;
+	private CommentsManager _commentsClient;
 
 }

@@ -27,14 +27,14 @@ import java.util.logging.Logger;
  * @author Julio Camarero
  */
 @Service
-public class CommentsClient {
+public class CommentsManager {
 	public Comment postMessage(
 			Repository repo, int number, String message)
 		throws IOException {
 
 		for (int retryCount = 1; retryCount <= _MAX_RETRIES; retryCount++) {
 			try {
-				return doPostMessage(repo, number, message);
+				return _doPostMessage(repo, number, message);
 			}
 			catch (IOException ioe) {
 				LOGGER.warning("Error when posting comment in github.");
@@ -54,7 +54,7 @@ public class CommentsClient {
 		return null; // Code should never reach this point
 	}
 
-	private Comment doPostMessage(
+	private Comment _doPostMessage(
 			Repository repo, int number, String message)
 		throws IOException {
 
@@ -84,7 +84,7 @@ public class CommentsClient {
 	}
 
 	private static final Logger LOGGER = Logger.getLogger(
-		CommentsClient.class.getName());
+		CommentsManager.class.getName());
 
 	private final int _MAX_RETRIES = 3;
 
