@@ -11,7 +11,7 @@
  * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
  * details.
  */
-package com.liferay.javadoc.checker.github;
+package com.liferay.javadoc.checker.model;
 
 import org.eclipse.egit.github.core.PullRequest;
 
