@@ -52,53 +52,59 @@ public class BuildExecutor {
 		String path = "/tmp/" + branch + String.valueOf(random.nextLong());
 		File dir = new File(path);
 
-		LOGGER.info("Clonning git Repo.");
+		Git git = null;
+		JavadocReport report = null;
 
-		Git git = Git.cloneRepository()
-		.setURI("https://github.com/" + repo.generateId())
-		.setDirectory(dir)
-		.setBranchesToClone(singleton("refs/heads/" + branch))
-		.setBranch("refs/heads/" + branch)
-		.setCredentialsProvider(
-			new UsernamePasswordCredentialsProvider(
-				_credentialsManager.getGithubUser(),
-				_credentialsManager.getGithubPassword()))
-		.call();
+		try {
+			LOGGER.info("Clonning git Repo.");
 
-		LOGGER.info("Executing checkStyle in repo.");
+			git = Git.cloneRepository()
+				.setURI("https://github.com/" + repo.generateId())
+				.setDirectory(dir)
+				.setBranchesToClone(singleton("refs/heads/" + branch))
+				.setBranch("refs/heads/" + branch)
+				.setCredentialsProvider(
+					new UsernamePasswordCredentialsProvider(
+						_credentialsManager.getGithubUser(),
+						_credentialsManager.getGithubPassword()))
+				.call();
 
-		JavadocCheckerConfigurationReader configurationReader =
-			new JavadocCheckerConfigurationReader(path);
+			LOGGER.info("Executing checkStyle in repo.");
 
-		Map<String, Object> parameters = new HashMap();
+			JavadocCheckerConfigurationReader configurationReader =
+				new JavadocCheckerConfigurationReader(path);
 
-		parameters.put("report-title", configurationReader.getReportTitle());
+			Map<String, Object> parameters = new HashMap();
 
-		CheckStyleExecutor checkStyleExecutor = new CheckStyleExecutor(
-			configurationReader.getIncludeDirectories(),
-			configurationReader.getExcludeDirectories(), parameters, true,
-			path);
+			parameters.put("report-title", configurationReader.getReportTitle());
 
-		JavadocReport report = checkStyleExecutor.execute();
+			CheckStyleExecutor checkStyleExecutor = new CheckStyleExecutor(
+				configurationReader.getIncludeDirectories(),
+				configurationReader.getExcludeDirectories(), parameters, true,
+				path);
 
-		Build baseBuild = _buildManager.getBuild(
-			repo.getOwner().getLogin(), repo.getName(), branch);
+			report = checkStyleExecutor.execute();
 
-		Build headBuild = new Build();
+			Build baseBuild = _buildManager.getBuild(
+				repo.getOwner().getLogin(), repo.getName(), branch);
 
-		headBuild.setBranch(branch);
-		headBuild.setRepoOwner(repo.getOwner().getLogin());
-		headBuild.setRepoName(repo.getName());
-		headBuild.setJavadocReport(report);
+			Build headBuild = new Build();
 
-		headBuild = _buildManager.saveBuild(headBuild);
+			headBuild.setBranch(branch);
+			headBuild.setRepoOwner(repo.getOwner().getLogin());
+			headBuild.setRepoName(repo.getName());
+			headBuild.setJavadocReport(report);
 
-		_commitStatusManager.updateStatus(
-			repo, sha, baseBuild, headBuild);
+			headBuild = _buildManager.saveBuild(headBuild);
 
-		FileUtils.deleteDirectory(dir);
+			_commitStatusManager.updateStatus(
+				repo, sha, baseBuild, headBuild);
+		}
+		finally {
+			FileUtils.deleteDirectory(dir);
 
-		git.close();
+			git.close();
+		}
 
 		return report.retrieveHtml();
 	}
