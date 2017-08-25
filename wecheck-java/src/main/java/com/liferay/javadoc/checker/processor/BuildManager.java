@@ -13,7 +13,6 @@
  */
 package com.liferay.javadoc.checker.processor;
 
-import com.google.gson.Gson;
 import com.liferay.javadoc.checker.controller.ReposController;
 import com.liferay.javadoc.checker.model.Build;
 import com.wedeploy.android.WeDeploy;
@@ -21,6 +20,7 @@ import com.wedeploy.android.exception.WeDeployException;
 import com.wedeploy.android.query.SortOrder;
 import com.wedeploy.android.query.filter.Filter;
 import com.wedeploy.android.transport.Response;
+import org.eclipse.egit.github.core.client.GsonUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -45,9 +45,7 @@ public class BuildManager {
 		WeDeploy weDeploy = new WeDeploy.Builder().build();
 
 		try {
-			Gson gson = new Gson();
-
-			String buildGson = gson.toJson(build);
+			String buildGson = GsonUtils.toJson(build);
 
 			LOGGER.fine(
 				"GSON deserialized: " +  buildGson);
@@ -64,7 +62,7 @@ public class BuildManager {
 
 			JSONObject responseBuild = new JSONObject(response.getBody());
 
-			return gson.fromJson(responseBuild.toString(), Build.class);
+			return GsonUtils.fromJson(responseBuild.toString(), Build.class);
 		}
 		catch (WeDeployException e) {
 			LOGGER.severe(
@@ -102,7 +100,7 @@ public class BuildManager {
 
 				LOGGER.fine("Build retrieved from WeDeploy DB: " + buildJSON);
 
-				return new Gson().fromJson(buildJSON.toString(), Build.class);
+				return GsonUtils.fromJson(buildJSON.toString(), Build.class);
 			}
 			else {
 				LOGGER.fine("No Build found in WeDeploy DB.");
@@ -141,7 +139,7 @@ public class BuildManager {
 
 			LOGGER.fine("Build retrieved from WeDeploy DB: " + buildJSON);
 
-			return new Gson().fromJson(buildJSON.toString(), Build.class);
+			return GsonUtils.fromJson(buildJSON.toString(), Build.class);
 		}
 		catch (WeDeployException e) {
 			LOGGER.severe(

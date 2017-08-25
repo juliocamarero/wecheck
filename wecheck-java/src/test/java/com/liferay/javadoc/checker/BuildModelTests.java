@@ -1,10 +1,10 @@
 package com.liferay.javadoc.checker;
 
-import com.google.gson.Gson;
 import com.liferay.javadoc.checker.model.JavadocReport;
 import com.liferay.javadoc.checker.model.ReportError;
 import com.liferay.javadoc.checker.model.ReportFile;
 import com.liferay.javadoc.checker.model.Build;
+import org.eclipse.egit.github.core.client.GsonUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -25,9 +25,7 @@ public class BuildModelTests {
 	public void buildParser() throws JSONException {
 		Build build = _createBuild();
 
-		Gson gson = new Gson();
-
-		JSONObject jsonObject = new JSONObject(gson.toJson(build));
+		JSONObject jsonObject = new JSONObject(GsonUtils.toJson(build));
 
 		Assert.assertEquals(
 			jsonObject.getString("repoName"), build.getRepoName());
