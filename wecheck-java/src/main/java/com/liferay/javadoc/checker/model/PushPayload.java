@@ -23,20 +23,35 @@ public class PushPayload extends
 	org.eclipse.egit.github.core.event.PushPayload {
 
 	/**
-	 * @return repo
+	 * @return repository
 	 */
+	public Repository getRepository() {
+		return repository;
+	}
+
 	public Repository getRepo() {
-		return repo;
+		return repository;
 	}
 
 	/**
-	 * @param repo
+	 * @param repository
 	 * @return this payload
 	 */
-	public PushPayload setRepo(Repository repo) {
-		this.repo = repo;
+	public PushPayload setRepository(Repository repository) {
+		this.repository = repository;
 		return this;
 	}
 
-	private Repository repo;
+	public String getAfter() {
+		return after;
+	}
+
+	public PushPayload setAfter(String after) {
+		this.after = after;
+		return this;
+	}
+
+
+	private Repository repository;
+	private String after;
 }
