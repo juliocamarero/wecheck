@@ -16,9 +16,11 @@ package com.liferay.javadoc.checker.controller;
 import com.liferay.javadoc.checker.model.PushPayload;
 import com.liferay.javadoc.checker.processor.PullRequestProcessor;
 
+import java.util.Objects;
 import java.util.logging.Logger;
 
 import com.liferay.javadoc.checker.processor.PushProcessor;
+import org.eclipse.egit.github.core.Repository;
 import org.eclipse.egit.github.core.client.GsonUtils;
 import org.eclipse.egit.github.core.event.PullRequestPayload;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -82,12 +84,18 @@ public class GithubController {
 			PushPayload pushPayload = GsonUtils.fromJson(
 				payload, PushPayload.class);
 
-			String defaultBranch = pushPayload.getRepo().getDefaultBranch();
+			Repository repo = pushPayload.getRepo();
 
-			if (pushPayload.getRef() == defaultBranch) {
+			String defaultBranch = repo.getDefaultBranch();
+
+			String ref = pushPayload.getRef();
+
+			String pushedToBranch = ref.substring(ref.lastIndexOf("/") + 1);
+
+			if (Objects.equals(pushedToBranch, defaultBranch)) {
 				LOGGER.info(
 					"Processing Push Event to default Branch (branch: "
-						+ pushPayload.getRef() + " )");
+						+ pushedToBranch + " )");
 
 				try {
 					_pushProcessor.process(pushPayload);

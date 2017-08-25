@@ -36,17 +36,17 @@ public class PushProcessor {
 
 		Repository repo = pushPayload.getRepo();
 
-		String branch = pushPayload.getRef();
+		String sha = pushPayload.getAfter();
 
-		LOGGER.info(
-			"Processing Push to repo " + repo.generateId() +
-				" - Branch " + pushPayload.getRef());
-
-		String sha = pushPayload.getHead();
+		// Not sure this repo object contains the right owner object
 
 		_commitStatusManager.setStatusPending(repo, sha);
 
-		_buildExecutor.execute(repo, branch, sha);
+		String ref = pushPayload.getRef();
+
+		String pushedToBranch = ref.substring(ref.lastIndexOf("/") + 1);
+
+		_buildExecutor.execute(repo, pushedToBranch, sha);
 	}
 
 	private static final Logger LOGGER = Logger.getLogger(
