@@ -62,16 +62,21 @@ public class CommitStatusManager {
 	protected CommitStatus createCommitStatus(
 		Build baseBuild, Build headBuild) {
 
-		double baseScore = 0;
-		int baseErrors = 99999;
-
-		if (baseBuild != null) {
-			baseScore = round(baseBuild.getScore(), 2);
-			baseErrors = baseBuild.getErrors();
-		}
-
 		double headScore = round(headBuild.getScore(), 2);
 		int headErrors = headBuild.getErrors();
+
+		if (baseBuild == null) {
+			String description = String.format(
+				"This is your first build :) Your score is %.2f%% (%s errors)",
+				headScore, headErrors);
+
+			return createCommitStatus(
+				CommitStatus.STATE_SUCCESS, description,
+				_buildManager.getBuildURL(headBuild));
+		}
+
+		double baseScore = round(baseBuild.getScore(), 2);
+		int	baseErrors = baseBuild.getErrors();
 
 		if (headScore == baseScore) {
 			if (baseErrors == headErrors) {
