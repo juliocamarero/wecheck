@@ -59,7 +59,7 @@ public class BuildExecutor {
 			LOGGER.info("Clonning git Repo.");
 
 			git = Git.cloneRepository()
-				.setURI("https://github.com/" + repo.generateId())
+				.setURI(repo.getCloneUrl())
 				.setDirectory(dir)
 				.setBranchesToClone(singleton("refs/heads/" + branch))
 				.setBranch("refs/heads/" + branch)
