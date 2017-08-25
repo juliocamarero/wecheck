@@ -103,7 +103,9 @@ public class BuildExecutor {
 		finally {
 			FileUtils.deleteDirectory(dir);
 
-			git.close();
+			if (git != null) {
+				git.close();
+			}
 		}
 
 		return report.retrieveHtml();
