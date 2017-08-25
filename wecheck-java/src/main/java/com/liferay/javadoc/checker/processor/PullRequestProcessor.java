@@ -21,6 +21,7 @@ import javax.xml.transform.TransformerException;
 
 import org.eclipse.egit.github.core.PullRequestMarker;
 import org.eclipse.egit.github.core.Repository;
+import org.eclipse.egit.github.core.event.PullRequestPayload;
 import org.eclipse.jgit.api.errors.GitAPIException;
 
 import org.json.JSONException;
@@ -35,9 +36,11 @@ import org.springframework.stereotype.Service;
 @Service
 public class PullRequestProcessor {
 
-	public void process(PullRequest pullRequest)
+	public void process(PullRequestPayload payload)
 		throws GitAPIException, InterruptedException, IOException,
 			JSONException, TransformerException {
+
+		PullRequest pullRequest = payload.getPullRequest();
 
 		Repository repo = _getRepo(pullRequest);
 

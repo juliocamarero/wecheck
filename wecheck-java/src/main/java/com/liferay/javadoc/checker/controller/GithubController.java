@@ -13,11 +13,14 @@
  */
 package com.liferay.javadoc.checker.controller;
 
-import com.liferay.javadoc.checker.model.GithubMessage;
+import com.liferay.javadoc.checker.model.PushPayload;
 import com.liferay.javadoc.checker.processor.PullRequestProcessor;
 
 import java.util.logging.Logger;
 
+import com.liferay.javadoc.checker.processor.PushProcessor;
+import org.eclipse.egit.github.core.client.GsonUtils;
+import org.eclipse.egit.github.core.event.PullRequestPayload;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -43,29 +46,73 @@ public class GithubController {
 	@ResponseBody
 	public String processPullRequestFromGithub(
 		@RequestHeader(value="X-Github-Event") String eventType,
-		@RequestBody GithubMessage githubMessage) {
+		@RequestBody String payload) {
 
 		LOGGER.info(
-			"Received event from Github: " + eventType + "(" +
-				githubMessage.getAction() + ")");
+			"Received event from Github: " + eventType);
 
-		if (githubMessage.isValidAction()) {
-			try {
-				_pullRequestProcessor.process(
-					githubMessage.getPull_request());
+		if (eventType.equals("pull_request")) {
+			PullRequestPayload pullRequestPayload = GsonUtils.fromJson(
+				payload, PullRequestPayload.class);
+
+			String action = pullRequestPayload.getAction();
+
+			if ("opened".equals(action) || "synchronize".equals(action)) {
+
+				LOGGER.info(
+					"Processing pull request (action: " +
+						pullRequestPayload.getAction() + " )");
+
+				try {
+					_pullRequestProcessor.process(pullRequestPayload);
+				}
+				catch (Exception e) {
+					LOGGER.severe(e.getCause().getMessage());
+
+					e.printStackTrace();
+				}
 			}
-			catch (Exception e) {
-				LOGGER.severe(e.getCause().getMessage());
+			else {
+				LOGGER.info(
+					"Ignoring pull request (action: " +
+						pullRequestPayload.getAction()+ " )");
+			}
+		}
+		else if (eventType.equals("push")) {
+			PushPayload pushPayload = GsonUtils.fromJson(
+				payload, PushPayload.class);
 
-				e.printStackTrace();
+			String defaultBranch = pushPayload.getRepo().getDefaultBranch();
+
+			if (pushPayload.getRef() == defaultBranch) {
+				LOGGER.info(
+					"Processing Push Event to default Branch (branch: "
+						+ pushPayload.getRef() + " )");
+
+				try {
+					_pushProcessor.process(pushPayload);
+				}
+				catch (Exception e) {
+					LOGGER.severe(e.getCause().getMessage());
+
+					e.printStackTrace();
+				}
+			}
+			else {
+				LOGGER.info(
+					"Ignoring push event to branch (branch: "
+						+ pushPayload.getRef() + " )");
 			}
 		}
 		else {
-			LOGGER.info("Ignoring event");
+			LOGGER.info("Ignoring event: " + eventType);
 		}
 
 		return "SUCCESS";
 	}
+
+	@Autowired
+	private PushProcessor _pushProcessor;
 
 	@Autowired
 	private PullRequestProcessor _pullRequestProcessor;
