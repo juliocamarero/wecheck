@@ -85,8 +85,11 @@ public class BuildExecutor {
 
 			report = checkStyleExecutor.execute();
 
+			// We always compare with the default branch of the Repo
+
 			Build baseBuild = _buildManager.getBuild(
-				repo.getOwner().getLogin(), repo.getName(), branch);
+				repo.getOwner().getLogin(), repo.getName(),
+				repo.getDefaultBranch());
 
 			Build headBuild = new Build();
 
