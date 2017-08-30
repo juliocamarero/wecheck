@@ -29,6 +29,7 @@ import org.springframework.stereotype.Service;
 import javax.xml.transform.TransformerException;
 import java.io.File;
 import java.io.IOException;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -97,6 +98,10 @@ public class BuildExecutor {
 			headBuild.setRepoOwner(repo.getOwner().getLogin());
 			headBuild.setRepoName(repo.getName());
 			headBuild.setJavadocReport(report);
+			headBuild.setScore(report.getScore());
+			headBuild.setErrors(report.getTotalErrors());
+			headBuild.setTime(new Date().getTime());
+			headBuild.setSha(sha);
 
 			headBuild = _buildManager.saveBuild(headBuild);
 
