@@ -28,12 +28,12 @@ public class BuildModelTests {
 		JSONObject jsonObject = new JSONObject(GsonUtils.toJson(build));
 
 		Assert.assertEquals(
-			jsonObject.getString("repoName"), build.getRepoName());
+			jsonObject.getString("repo_name"), build.getRepoName());
 
-		JSONObject javadocReportJSON = jsonObject.getJSONObject("javadocReport");
+		JSONObject javadocReportJSON = jsonObject.getJSONObject("javadoc_report");
 
 		Assert.assertEquals(
-			javadocReportJSON.getInt("totalErrors"),
+			javadocReportJSON.getInt("total_errors"),
 			build.getJavadocReport().getTotalErrors());
 
 		JSONArray files = javadocReportJSON.getJSONArray("files");

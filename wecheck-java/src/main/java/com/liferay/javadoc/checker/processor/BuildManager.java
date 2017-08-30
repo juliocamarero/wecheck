@@ -85,8 +85,8 @@ public class BuildManager {
 				.where(
 					Filter.composite(
 						"and",
-							Filter.field("repoOwner", repoOwner),
-							Filter.field("repoName", repoName),
+							Filter.field("repo_owner", repoOwner),
+							Filter.field("repo_name", repoName),
 							Filter.field("branch", branch)))
 				.orderBy("time", SortOrder.DESCENDING)
 				.limit(1)
@@ -176,6 +176,10 @@ public class BuildManager {
 
 	public double getScore(String repoOwner, String repoName, String branch) {
 		Build build = getBuild(repoOwner, repoName, branch);
+
+		if (build == null) {
+			return -1; // this means there isn't any build for this branch
+		}
 
 		return build.getScore();
 	}
