@@ -59,7 +59,9 @@ public class GithubController {
 
 			String action = pullRequestPayload.getAction();
 
-			if ("opened".equals(action) || "synchronize".equals(action)) {
+			if ("opened".equals(action) ||
+				"synchronize".equals(action) ||
+				"reopened".equals(action)) {
 
 				LOGGER.info(
 					"Processing pull request (action: " +
