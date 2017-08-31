@@ -46,7 +46,7 @@ public class GithubController {
 
 	@PostMapping("/pull-request")
 	@ResponseBody
-	public String processPullRequestFromGithub(
+	public String processRequestFromGithub(
 		@RequestHeader(value="X-Github-Event") String eventType,
 		@RequestBody String payload) {
 
