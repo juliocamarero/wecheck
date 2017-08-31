@@ -15,12 +15,12 @@ package com.liferay.javadoc.checker.processor;
 
 import com.liferay.javadoc.checker.controller.ReposController;
 import com.liferay.javadoc.checker.model.Build;
+import com.liferay.javadoc.checker.util.GsonUtils;
 import com.wedeploy.android.WeDeploy;
 import com.wedeploy.android.exception.WeDeployException;
 import com.wedeploy.android.query.SortOrder;
 import com.wedeploy.android.query.filter.Filter;
 import com.wedeploy.android.transport.Response;
-import org.eclipse.egit.github.core.client.GsonUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;

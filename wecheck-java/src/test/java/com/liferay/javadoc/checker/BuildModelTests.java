@@ -4,7 +4,7 @@ import com.liferay.javadoc.checker.model.JavadocReport;
 import com.liferay.javadoc.checker.model.ReportError;
 import com.liferay.javadoc.checker.model.ReportFile;
 import com.liferay.javadoc.checker.model.Build;
-import org.eclipse.egit.github.core.client.GsonUtils;
+import com.liferay.javadoc.checker.util.GsonUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;

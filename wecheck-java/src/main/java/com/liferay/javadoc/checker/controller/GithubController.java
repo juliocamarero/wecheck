@@ -20,8 +20,8 @@ import java.util.Objects;
 import java.util.logging.Logger;
 
 import com.liferay.javadoc.checker.processor.PushProcessor;
+import com.liferay.javadoc.checker.util.GsonUtils;
 import org.eclipse.egit.github.core.Repository;
-import org.eclipse.egit.github.core.client.GsonUtils;
 import org.eclipse.egit.github.core.event.PullRequestPayload;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
