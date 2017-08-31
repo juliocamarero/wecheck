@@ -135,7 +135,7 @@ public class CommitStatusManager {
 		commitStatus.setState(state);
 
 		if (!Objects.isNull(url)){
-			commitStatus.setUrl(url);
+			commitStatus.setTargetUrl(url);
 		}
 
 		return commitStatus;
