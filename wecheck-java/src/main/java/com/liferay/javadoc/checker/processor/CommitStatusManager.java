@@ -81,7 +81,8 @@ public class CommitStatusManager {
 		if (headScore == baseScore) {
 			if (baseErrors == headErrors) {
 				String description = String.format(
-					"Javadocs remained the same: %.2f%%", headScore);
+					"Javadocs remained the same: %.2f%% (%s errors)",
+					headScore, headErrors);
 
 				return createCommitStatus(
 					CommitStatus.STATE_SUCCESS, description,
@@ -108,8 +109,9 @@ public class CommitStatusManager {
 		}
 		else if (headScore > baseScore){
 			String description = String.format(
-				"Javadocs increased (%.2f%%) to %.2f%% (%s errors)",
-				(headScore - baseScore), headScore, headErrors);
+				"Javadocs increased (%.2f%% / %s errors) to %.2f%% (%s errors)",
+				(headScore - baseScore), (headErrors-baseErrors), headScore,
+				headErrors);
 
 			return createCommitStatus(
 				CommitStatus.STATE_SUCCESS, description,
@@ -117,8 +119,9 @@ public class CommitStatusManager {
 		}
 
 		String description = String.format(
-			"Javadocs decreased (%.2f%%) to %.2f%% (%s errors)",
-			(baseScore - headScore), headScore, headErrors);
+			"Javadocs decreased (%.2f%% / %s errors) to %.2f%% (%s errors)",
+			(baseScore - headScore), (headErrors - baseErrors), headScore,
+			headErrors);
 
 		return createCommitStatus(
 			CommitStatus.STATE_FAILURE, description,

@@ -41,7 +41,7 @@ public class CommitStatusManagerTests {
 		Assert.assertEquals(
 			CommitStatus.STATE_SUCCESS, commitStatus.getState());
 		Assert.assertEquals(
-			"Javadocs increased (10.00%) to 60.00% (50 errors)",
+			"Javadocs increased (10.00% / -50 errors) to 60.00% (50 errors)",
 			commitStatus.getDescription());
 	}
 
@@ -104,7 +104,7 @@ public class CommitStatusManagerTests {
 		Assert.assertEquals(
 			CommitStatus.STATE_SUCCESS, commitStatus.getState());
 		Assert.assertEquals(
-			"Javadocs remained the same: 50.00%",
+			"Javadocs remained the same: 50.00% (100 errors)",
 			commitStatus.getDescription());
 	}
 
@@ -125,7 +125,7 @@ public class CommitStatusManagerTests {
 		Assert.assertEquals(
 			CommitStatus.STATE_FAILURE, commitStatus.getState());
 		Assert.assertEquals(
-			"Javadocs decreased (10.00%) to 40.00% (100 errors)",
+			"Javadocs decreased (10.00% / 50 errors) to 40.00% (100 errors)",
 			commitStatus.getDescription());
 	}
 
