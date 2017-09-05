@@ -44,7 +44,7 @@ import static java.util.Collections.singleton;
 @Service
 public class BuildExecutor {
 
-	public Build execute(
+	public String execute(
 			Repository repo, String branch, String sha)
 		throws GitAPIException, InterruptedException, IOException,
 			JSONException, TransformerException {
@@ -56,7 +56,6 @@ public class BuildExecutor {
 
 		Git git = null;
 		JavadocReport report = null;
-		Build headBuild = new Build();
 
 		try {
 			_log.debug("Clonning git Repo.");
@@ -88,6 +87,14 @@ public class BuildExecutor {
 
 			report = checkStyleExecutor.execute();
 
+			// We always compare with the default branch of the Repo
+
+			Build baseBuild = _buildManager.getBuild(
+				repo.getOwner().getLogin(), repo.getName(),
+				repo.getDefaultBranch());
+
+			Build headBuild = new Build();
+
 			headBuild.setBranch(branch);
 			headBuild.setRepoOwner(repo.getOwner().getLogin());
 			headBuild.setRepoName(repo.getName());
@@ -96,12 +103,6 @@ public class BuildExecutor {
 			headBuild.setErrors(report.getTotalErrors());
 			headBuild.setTime(new Date().getTime());
 			headBuild.setSha(sha);
-
-			// We always compare with the default branch of the Repo
-
-			Build baseBuild = _buildManager.getBuild(
-				repo.getOwner().getLogin(), repo.getName(),
-				repo.getDefaultBranch());
 
 			headBuild = _buildManager.saveBuild(headBuild);
 
@@ -116,7 +117,7 @@ public class BuildExecutor {
 			}
 		}
 
-		return headBuild;
+		return report.retrieveHtml();
 	}
 
 	private static final Logger _log = LoggerFactory.getLogger(
