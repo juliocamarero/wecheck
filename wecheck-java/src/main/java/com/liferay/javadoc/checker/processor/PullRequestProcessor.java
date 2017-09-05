@@ -19,6 +19,7 @@ import java.util.logging.Logger;
 
 import javax.xml.transform.TransformerException;
 
+import com.liferay.javadoc.checker.model.Build;
 import org.eclipse.egit.github.core.PullRequestMarker;
 import org.eclipse.egit.github.core.Repository;
 import org.eclipse.egit.github.core.event.PullRequestPayload;
@@ -58,11 +59,12 @@ public class PullRequestProcessor {
 
 		_commitStatusManager.setStatusPending(repo, head.getSha());
 
-		String message = _buildExecutor.execute(
+		Build build = _buildExecutor.execute(
 			repo, head.getRef(), head.getSha());
 
 		_commentsClient.postMessage(
-			repo, pullRequest.getNumber(), message);
+			repo, pullRequest.getNumber(),
+			build.getJavadocReport().retrieveHtml());
 	}
 
 	private Repository _getRepo(PullRequest pullRequest) {
