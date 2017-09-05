@@ -50,11 +50,6 @@ public class PullRequestProcessor {
 				" - Number " + pullRequest.getNumber() + " : " +
 					pullRequest.getTitle());
 
-		if (printInitialMessage) {
-			_commentsClient.postMessage(
-				repo, pullRequest.getNumber(),	"Checking your Javadocs...");
-		}
-
 		PullRequestMarker head = pullRequest.getHead();
 
 		_commitStatusManager.setStatusPending(repo, head.getSha());
@@ -73,10 +68,6 @@ public class PullRequestProcessor {
 
 	private static final Logger LOGGER = Logger.getLogger(
 		PullRequestProcessor.class.getName());
-
-	// This is legacy and will be removed
-
-	private boolean printInitialMessage = false;
 
 	@Autowired
 	private CommitStatusManager _commitStatusManager;
