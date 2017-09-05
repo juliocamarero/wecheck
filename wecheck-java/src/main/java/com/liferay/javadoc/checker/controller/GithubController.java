@@ -17,7 +17,8 @@ import com.liferay.javadoc.checker.model.PushPayload;
 import com.liferay.javadoc.checker.processor.PullRequestProcessor;
 
 import java.util.Objects;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.liferay.javadoc.checker.processor.PushProcessor;
 import com.liferay.javadoc.checker.util.GsonUtils;
@@ -50,7 +51,7 @@ public class GithubController {
 		@RequestHeader(value="X-Github-Event") String eventType,
 		@RequestBody String payload) {
 
-		LOGGER.info(
+		_log.info(
 			"Received event from Github: " + eventType);
 
 		if (eventType.equals("pull_request")) {
@@ -63,7 +64,7 @@ public class GithubController {
 				"synchronize".equals(action) ||
 				"reopened".equals(action)) {
 
-				LOGGER.info(
+				_log.info(
 					"Processing pull request (action: " +
 						pullRequestPayload.getAction() + " )");
 
@@ -71,13 +72,11 @@ public class GithubController {
 					_pullRequestProcessor.process(pullRequestPayload);
 				}
 				catch (Exception e) {
-					LOGGER.severe(e.getCause().getMessage());
-
-					e.printStackTrace();
+					_log.error("Error processing pull request: ", e);
 				}
 			}
 			else {
-				LOGGER.info(
+				_log.info(
 					"Ignoring pull request (action: " +
 						pullRequestPayload.getAction()+ " )");
 			}
@@ -95,7 +94,7 @@ public class GithubController {
 			String pushedToBranch = ref.substring(ref.lastIndexOf("/") + 1);
 
 			if (Objects.equals(pushedToBranch, defaultBranch)) {
-				LOGGER.info(
+				_log.info(
 					"Processing Push Event to default Branch (branch: "
 						+ pushedToBranch + " )");
 
@@ -103,19 +102,19 @@ public class GithubController {
 					_pushProcessor.process(pushPayload);
 				}
 				catch (Exception e) {
-					LOGGER.severe(e.getCause().getMessage());
+					_log.error("Error processing push event: ", e);
 
 					e.printStackTrace();
 				}
 			}
 			else {
-				LOGGER.info(
+				_log.info(
 					"Ignoring push event to branch (branch: "
 						+ pushPayload.getRef() + " )");
 			}
 		}
 		else {
-			LOGGER.info("Ignoring event: " + eventType);
+			_log.info("Ignoring event: " + eventType);
 		}
 
 		return "SUCCESS";
@@ -127,7 +126,7 @@ public class GithubController {
 	@Autowired
 	private PullRequestProcessor _pullRequestProcessor;
 
-	private static final Logger LOGGER = Logger.getLogger(
-		GithubController.class.getName());
+	private static final Logger _log = LoggerFactory.getLogger(
+		GithubController.class);
 
 }

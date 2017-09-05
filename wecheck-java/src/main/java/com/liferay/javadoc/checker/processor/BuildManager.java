@@ -26,7 +26,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.stereotype.Service;
 
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -47,12 +48,12 @@ public class BuildManager {
 		try {
 			String buildGson = GsonUtils.toJson(build);
 
-			LOGGER.fine(
+			_log.debug(
 				"GSON deserialized: " +  buildGson);
 
 			JSONObject buildJSON = new JSONObject(buildGson);
 
-			LOGGER.fine(
+			_log.info(
 				"Storing build in WeDeploy DB: " +  buildJSON.toString());
 
 			Response response = weDeploy
@@ -65,8 +66,8 @@ public class BuildManager {
 			return GsonUtils.fromJson(responseBuild.toString(), Build.class);
 		}
 		catch (WeDeployException e) {
-			LOGGER.severe(
-				"Unable to store in WeDeploy DB. Cause: " + e.getMessage());
+			_log.error(
+				"Unable to store in WeDeploy DB. " + e);
 
 			e.printStackTrace();
 		}
@@ -78,7 +79,7 @@ public class BuildManager {
 		WeDeploy weDeploy = new WeDeploy.Builder().build();
 
 		try {
-			LOGGER.fine("Obtaining latest build from WeDeploy DB.");
+			_log.info("Obtaining latest build from WeDeploy DB.");
 
 			Response response =	weDeploy
 				.data(_DB_SERVICE_URL)
@@ -98,25 +99,23 @@ public class BuildManager {
 			if (builds.length() > 0) {
 				JSONObject buildJSON = builds.getJSONObject(0);
 
-				LOGGER.fine("Build retrieved from WeDeploy DB: " + buildJSON);
+				_log.debug("Build retrieved from WeDeploy DB: " + buildJSON);
 
 				return GsonUtils.fromJson(buildJSON.toString(), Build.class);
 			}
 			else {
-				LOGGER.fine("No Build found in WeDeploy DB.");
+				_log.info("No Build found in WeDeploy DB.");
 			}
 		}
 		catch (WeDeployException e) {
-			LOGGER.severe(
-				"Unable to retrieve build from WeDeploy DB. Cause: " +
-					e.getMessage());
+			_log.error(
+				"Unable to retrieve build from WeDeploy DB. ", e);
 
 			e.printStackTrace();
 		}
 		catch (JSONException e) {
-			LOGGER.severe(
-				"Unable to convert response to JSON. Cause: " +
-					e.getMessage());
+			_log.error(
+				"Unable to convert response to JSON. ", e);
 
 			e.printStackTrace();
 		}
@@ -128,7 +127,7 @@ public class BuildManager {
 		WeDeploy weDeploy = new WeDeploy.Builder().build();
 
 		try {
-			LOGGER.fine("Obtaining latest build from WeDeploy DB.");
+			_log.debug("Obtaining latest build from WeDeploy DB.");
 
 			Response response =	weDeploy
 				.data(_DB_SERVICE_URL)
@@ -137,21 +136,19 @@ public class BuildManager {
 
 			JSONObject buildJSON = new JSONObject(response.getBody());
 
-			LOGGER.fine("Build retrieved from WeDeploy DB: " + buildJSON);
+			_log.debug("Build retrieved from WeDeploy DB: " + buildJSON);
 
 			return GsonUtils.fromJson(buildJSON.toString(), Build.class);
 		}
 		catch (WeDeployException e) {
-			LOGGER.severe(
-				"Unable to retrieve build from WeDeploy DB. Cause: " +
-					e.getMessage());
+			_log.error(
+				"Unable to retrieve build from WeDeploy DB. ", e);
 
 			e.printStackTrace();
 		}
 		catch (JSONException e) {
-			LOGGER.severe(
-				"Unable to convert response to JSON. Cause: " +
-					e.getMessage());
+			_log.error(
+				"Unable to convert response to JSON. " , e);
 
 			e.printStackTrace();
 		}
@@ -184,8 +181,8 @@ public class BuildManager {
 		return build.getScore();
 	}
 
-	private static final Logger LOGGER = Logger.getLogger(
-		BuildManager.class.getName());
+	private static final Logger _log = LoggerFactory.getLogger(
+		BuildManager.class);
 
 	private final String _DB_SERVICE_URL = "https://db-wecheck.wedeploy.io";
 	private final String _API_URL = "https://api-wecheck.wedeploy.io";

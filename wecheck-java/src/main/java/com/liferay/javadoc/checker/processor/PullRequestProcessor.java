@@ -15,7 +15,8 @@ package com.liferay.javadoc.checker.processor;
 
 import java.io.IOException;
 
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.xml.transform.TransformerException;
 
@@ -45,7 +46,7 @@ public class PullRequestProcessor {
 
 		Repository repo = _getRepo(pullRequest);
 
-		LOGGER.info(
+		_log.info(
 			"Processing Pull Request from " + repo.generateId() +
 				" - Number " + pullRequest.getNumber() + " : " +
 					pullRequest.getTitle());
@@ -66,8 +67,8 @@ public class PullRequestProcessor {
 		return pullRequest.getBase().getRepo();
 	}
 
-	private static final Logger LOGGER = Logger.getLogger(
-		PullRequestProcessor.class.getName());
+	private static final Logger _log = LoggerFactory.getLogger(
+		PullRequestProcessor.class);
 
 	@Autowired
 	private CommitStatusManager _commitStatusManager;

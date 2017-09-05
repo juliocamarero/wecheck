@@ -18,7 +18,8 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import java.util.Properties;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Julio Camarero
@@ -42,7 +43,7 @@ public class JavadocCheckerConfigurationReader {
 			String value = _properties.getProperty("exclude.directories");
 
 			if ((value != null) && !value.isEmpty()) {
-				LOGGER.info("Directories to ignore: " + value);
+				_log.debug("Directories to ignore: " + value);
 
 				String[] relativeDirectories = value.split(",");
 
@@ -65,7 +66,7 @@ public class JavadocCheckerConfigurationReader {
 			String value = _properties.getProperty("include.directories");
 
 			if ((value != null) && !value.isEmpty()) {
-				LOGGER.info("Directories to analize: " + value);
+				_log.debug("Directories to analize: " + value);
 
 				String[] relativeDirectories = value.split(",");
 				includeDirectories = new String[relativeDirectories.length];
@@ -86,7 +87,7 @@ public class JavadocCheckerConfigurationReader {
 		if (_properties != null) {
 			reportTitle = _properties.getProperty("report.title");
 
-			LOGGER.info("Report Title read from properties: " + reportTitle);
+			_log.debug("Report Title read from properties: " + reportTitle);
 		}
 
 		if ((reportTitle == null) || reportTitle.isEmpty()) {
@@ -107,7 +108,7 @@ public class JavadocCheckerConfigurationReader {
 			properties.load(inputStream);
 		}
 		catch (IOException ioe) {
-			LOGGER.warning("Unable to load properties file: " + ioe);
+			_log.error("Unable to load properties file: ", ioe);
 
 			ioe.printStackTrace();
 		}
@@ -117,8 +118,8 @@ public class JavadocCheckerConfigurationReader {
 					inputStream.close();
 				}
 				catch (IOException ioe) {
-					LOGGER.warning(
-						"Unable to close inputstream for reading properties: " +
+					_log.error(
+						"Unable to close inputstream for reading properties: ",
 						ioe);
 
 					ioe.printStackTrace();
@@ -129,8 +130,8 @@ public class JavadocCheckerConfigurationReader {
 		return properties;
 	}
 
-	private static final Logger LOGGER = Logger.getLogger(
-		JavadocCheckerConfigurationReader.class.getName());
+	private static final Logger _log = LoggerFactory.getLogger(
+		JavadocCheckerConfigurationReader.class);
 
 	private String _defaultReportTitle = "";
 	private String _projectDirectory;

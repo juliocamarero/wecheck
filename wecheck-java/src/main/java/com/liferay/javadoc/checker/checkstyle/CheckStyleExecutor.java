@@ -36,7 +36,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -105,7 +106,7 @@ public class CheckStyleExecutor {
 		JavadocReport report = null;
 
 		try {
-			LOGGER.fine("Generating report from Code Anaylisis.");
+			_log.debug("Generating report from Code Anaylisis.");
 
 			report = processXML(_path);
 		}
@@ -222,7 +223,7 @@ public class CheckStyleExecutor {
 		report.setHtml(reportHTML);
 		//LOGGER.fine(reportHTML);
 
-		LOGGER.fine(report.toString());
+		_log.debug(report.toString());
 
 		return report;
 	}
@@ -289,8 +290,8 @@ public class CheckStyleExecutor {
 			StandardCharsets.UTF_8);
 	}
 
-	private static final Logger LOGGER = Logger.getLogger(
-		CheckStyleExecutor.class.getName());
+	private static final Logger _log = LoggerFactory.getLogger(
+		CheckStyleExecutor.class);
 
 	private String _configurationFile;
 	private String _configurationFileLocation = "checkstyle/checkstyle.xml";

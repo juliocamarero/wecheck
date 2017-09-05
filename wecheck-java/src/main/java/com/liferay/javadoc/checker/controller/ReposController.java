@@ -26,7 +26,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.io.IOException;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Controller
 @RequestMapping(ReposController.REPO_ROOT_PATH)
@@ -91,7 +92,7 @@ public class ReposController {
 	@Autowired
 	private BuildManager _buildManager;
 
-	private static final Logger LOGGER = Logger.getLogger(
-		ReposController.class.getName());
+	private static final Logger _log = LoggerFactory.getLogger(
+		ReposController.class);
 
 }

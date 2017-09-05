@@ -17,11 +17,12 @@ import org.eclipse.egit.github.core.Comment;
 import org.eclipse.egit.github.core.Repository;
 import org.eclipse.egit.github.core.client.GitHubClient;
 import org.eclipse.egit.github.core.service.IssueService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.util.logging.Logger;
 
 /**
  * @author Julio Camarero
@@ -37,13 +38,13 @@ public class CommentsManager {
 				return _doPostMessage(repo, number, message);
 			}
 			catch (IOException ioe) {
-				LOGGER.warning("Error when posting comment in github.");
+				_log.error("Error when posting comment in github.", ioe);
 
 				if (retryCount >= _MAX_RETRIES) {
 					throw ioe;
 				}
 
-				LOGGER.warning(
+				_log.debug(
 					"Retrying in " + _RETRY_PERIOD_DEFAULT + " seconds. (" +
 					retryCount + ")");
 
@@ -67,7 +68,7 @@ public class CommentsManager {
 
 		Comment comment = service.createComment(repo, number, message);
 
-		LOGGER.info(
+		_log.debug(
 			"Comment posted successfully to pull request " + number + " - " +
 				repo.generateId());
 
@@ -83,8 +84,8 @@ public class CommentsManager {
 		}
 	}
 
-	private static final Logger LOGGER = Logger.getLogger(
-		CommentsManager.class.getName());
+	private static final Logger _log = LoggerFactory.getLogger(
+		CredentialsManager.class);
 
 	private final int _MAX_RETRIES = 3;
 

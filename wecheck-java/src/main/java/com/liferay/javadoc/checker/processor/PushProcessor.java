@@ -22,7 +22,8 @@ import org.springframework.stereotype.Service;
 
 import javax.xml.transform.TransformerException;
 import java.io.IOException;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Julio Camarero
@@ -49,8 +50,8 @@ public class PushProcessor {
 		_buildExecutor.execute(repo, pushedToBranch, sha);
 	}
 
-	private static final Logger LOGGER = Logger.getLogger(
-		PushProcessor.class.getName());
+	private static final Logger _log = LoggerFactory.getLogger(
+		PushProcessor.class);
 
 	@Autowired
 	private CommitStatusManager _commitStatusManager;

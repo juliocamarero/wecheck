@@ -18,7 +18,8 @@ import org.springframework.stereotype.Service;
 import javax.xml.bind.DatatypeConverter;
 import java.io.UnsupportedEncodingException;
 import java.util.Objects;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Julio Camarero
@@ -29,7 +30,7 @@ public class CredentialsManager {
 		String githubPassword = System.getenv("githubPassword");
 
 		if (Objects.isNull(githubPassword)) {
-			LOGGER.severe(
+			_log.error(
 				"Missing githubPassword environment variables");
 		}
 
@@ -40,25 +41,14 @@ public class CredentialsManager {
 		String githubUser = System.getenv("githubUser");
 
 		if (Objects.isNull(githubUser)) {
-			LOGGER.severe(
+			_log.error(
 				"Missing githubUser environment variables");
-		}
-		else {
-			//LOGGER.fine("Using github user: " + githubUser);
 		}
 
 		return githubUser;
 	}
 
-	public String getBasicAuthHeader() throws UnsupportedEncodingException {
-		String userpass = getGithubUser() + ":" + getGithubPassword();
-
-		return "Basic " +
-			DatatypeConverter.printBase64Binary(
-				userpass.getBytes("UTF-8"));
-	}
-
-	private static final Logger LOGGER = Logger.getLogger(
-		CredentialsManager.class.getName());
+	private static final Logger _log = LoggerFactory.getLogger(
+		CredentialsManager.class);
 
 }

@@ -33,7 +33,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static java.util.Collections.singleton;
 
@@ -58,7 +59,7 @@ public class BuildExecutor {
 		Build headBuild = new Build();
 
 		try {
-			LOGGER.info("Clonning git Repo.");
+			_log.debug("Clonning git Repo.");
 
 			git = Git.cloneRepository()
 				.setURI(repo.getCloneUrl())
@@ -71,7 +72,7 @@ public class BuildExecutor {
 						_credentialsManager.getGithubPassword()))
 				.call();
 
-			LOGGER.info("Executing checkStyle in repo.");
+			_log.debug("Executing checkStyle in repo.");
 
 			JavadocCheckerConfigurationReader configurationReader =
 				new JavadocCheckerConfigurationReader(path);
@@ -118,9 +119,8 @@ public class BuildExecutor {
 		return headBuild;
 	}
 
-
-	private static final Logger LOGGER = Logger.getLogger(
-		PullRequestProcessor.class.getName());
+	private static final Logger _log = LoggerFactory.getLogger(
+		PullRequestProcessor.class);
 
 	@Autowired
 	private CommitStatusManager _commitStatusManager;

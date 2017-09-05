@@ -25,7 +25,8 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Objects;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Julio Camarero
@@ -155,14 +156,14 @@ public class CommitStatusManager {
 		CommitService commitService = new CommitService(gitHubClient);
 
 		try {
-			LOGGER.info(
+			_log.info(
 				"Updating status to commit " + sha + " - " +
 					repo.generateId());
 
 			commitStatus = commitService.createStatus(repo, sha, commitStatus);
 		}
 		catch (IOException e) {
-			LOGGER.severe("Error updating Status: " + e.getMessage());
+			_log.error("Error updating Status: ", e);
 
 			e.printStackTrace();
 		}
@@ -170,8 +171,8 @@ public class CommitStatusManager {
 		return commitStatus;
 	}
 
-	private static final Logger LOGGER = Logger.getLogger(
-		CommitStatusManager.class.getName());
+	private static final Logger _log = LoggerFactory.getLogger(
+		CommitStatusManager.class);
 
 
 	@Autowired
