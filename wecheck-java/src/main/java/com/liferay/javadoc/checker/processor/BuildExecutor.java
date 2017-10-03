@@ -11,32 +11,40 @@
  * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
  * details.
  */
+
 package com.liferay.javadoc.checker.processor;
+
+import static java.util.Collections.singleton;
 
 import com.liferay.javadoc.checker.checkstyle.CheckStyleExecutor;
 import com.liferay.javadoc.checker.configuration.JavadocCheckerConfigurationReader;
 import com.liferay.javadoc.checker.model.Build;
 import com.liferay.javadoc.checker.model.JavadocReport;
-import org.apache.commons.io.FileUtils;
-import org.eclipse.egit.github.core.Repository;
-import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
-import org.json.JSONException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
-import javax.xml.transform.TransformerException;
 import java.io.File;
 import java.io.IOException;
+
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
+
+import javax.xml.transform.TransformerException;
+
+import org.apache.commons.io.FileUtils;
+
+import org.eclipse.egit.github.core.Repository;
+import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
+
+import org.json.JSONException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static java.util.Collections.singleton;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 /**
  * @author Julio Camarero
@@ -44,8 +52,7 @@ import static java.util.Collections.singleton;
 @Service
 public class BuildExecutor {
 
-	public String execute(
-			Repository repo, String branch, String sha)
+	public String execute(Repository repo, String branch, String sha)
 		throws GitAPIException, InterruptedException, IOException,
 			JSONException, TransformerException {
 
@@ -58,7 +65,7 @@ public class BuildExecutor {
 		JavadocReport report = null;
 
 		try {
-			_log.debug("Clonning git Repo.");
+			_log.debug("Clonning git Repo: " + repo.getName());
 
 			git = Git.cloneRepository()
 				.setURI(repo.getCloneUrl())
@@ -78,7 +85,8 @@ public class BuildExecutor {
 
 			Map<String, Object> parameters = new HashMap();
 
-			parameters.put("report-title", configurationReader.getReportTitle());
+			parameters.put(
+				"report-title", configurationReader.getReportTitle());
 
 			CheckStyleExecutor checkStyleExecutor = new CheckStyleExecutor(
 				configurationReader.getIncludeDirectories(),
@@ -106,8 +114,11 @@ public class BuildExecutor {
 
 			headBuild = _buildManager.saveBuild(headBuild);
 
-			_commitStatusManager.updateStatus(
-				repo, sha, baseBuild, headBuild);
+			_commitStatusManager.updateStatus(repo, sha, baseBuild, headBuild);
+
+			_log.info(
+				"Build Execution finished for " + repo.getName() +
+				" - branch " + branch);
 		}
 		finally {
 			FileUtils.deleteDirectory(dir);
@@ -124,10 +135,10 @@ public class BuildExecutor {
 		PullRequestProcessor.class);
 
 	@Autowired
-	private CommitStatusManager _commitStatusManager;
+	private BuildManager _buildManager;
 
 	@Autowired
-	private BuildManager _buildManager;
+	private CommitStatusManager _commitStatusManager;
 
 	@Autowired
 	private CredentialsManager _credentialsManager;

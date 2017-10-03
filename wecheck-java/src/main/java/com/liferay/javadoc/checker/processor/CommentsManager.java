@@ -11,26 +11,29 @@
  * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
  * details.
  */
+
 package com.liferay.javadoc.checker.processor;
+
+import java.io.IOException;
 
 import org.eclipse.egit.github.core.Comment;
 import org.eclipse.egit.github.core.Repository;
 import org.eclipse.egit.github.core.client.GitHubClient;
 import org.eclipse.egit.github.core.service.IssueService;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.io.IOException;
 
 /**
  * @author Julio Camarero
  */
 @Service
 public class CommentsManager {
-	public Comment postMessage(
-			Repository repo, int number, String message)
+
+	public Comment postMessage(Repository repo, int number, String message)
 		throws IOException {
 
 		for (int retryCount = 1; retryCount <= _MAX_RETRIES; retryCount++) {
@@ -55,11 +58,11 @@ public class CommentsManager {
 		return null; // Code should never reach this point
 	}
 
-	private Comment _doPostMessage(
-			Repository repo, int number, String message)
+	private Comment _doPostMessage(Repository repo, int number, String message)
 		throws IOException {
 
 		GitHubClient gitHubClient = new GitHubClient();
+
 		gitHubClient.setCredentials(
 			_credentialsManager.getGithubUser(),
 			_credentialsManager.getGithubPassword());

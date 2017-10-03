@@ -11,7 +11,12 @@
  * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
  * details.
  */
+
 package com.liferay.javadoc.checker.util;
+
+import static org.eclipse.egit.github.core.client.IGitHubConstants.DATE_FORMAT;
+import static org.eclipse.egit.github.core.client.IGitHubConstants.DATE_FORMAT_V2_1;
+import static org.eclipse.egit.github.core.client.IGitHubConstants.DATE_FORMAT_V2_2;
 
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
@@ -22,27 +27,20 @@ import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 
 import java.lang.reflect.Type;
+
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+
 import java.util.Date;
 import java.util.TimeZone;
 
-import static org.eclipse.egit.github.core.client.IGitHubConstants.DATE_FORMAT;
-import static org.eclipse.egit.github.core.client.IGitHubConstants.DATE_FORMAT_V2_1;
-import static org.eclipse.egit.github.core.client.IGitHubConstants.DATE_FORMAT_V2_2;
-
 /**
- *
  * @author Julio Camarero
  */
-public class DateFormatter extends org.eclipse.egit.github.core.client.DateFormatter implements
-	JsonDeserializer<Date>,
-		JsonSerializer<Date> {
-
-	private final DateFormat[] formats;
-
-	String DATE_FORMAT_V3_1 = "ss";
+public class DateFormatter
+	extends org.eclipse.egit.github.core.client.DateFormatter
+	implements JsonDeserializer<Date>, JsonSerializer<Date> {
 
 	public DateFormatter() {
 		formats = new DateFormat[4];
@@ -56,15 +54,19 @@ public class DateFormatter extends org.eclipse.egit.github.core.client.DateForma
 		formats[3] = new SimpleDateFormat(DATE_FORMAT_V3_1);
 
 		final TimeZone timeZone = TimeZone.getTimeZone("Zulu"); //$NON-NLS-1$
-		for (DateFormat format : formats)
-			format.setTimeZone(timeZone);
+
+		for (DateFormat format : formats)format.setTimeZone(timeZone);
 	}
+
+	String DATE_FORMAT_V3_1 = "ss";
 
 	public Date deserialize(JsonElement json, Type typeOfT,
 							JsonDeserializationContext context) throws
 		JsonParseException {
+
 		JsonParseException exception = null;
 		final String value = json.getAsString();
+
 		for (DateFormat format : formats)
 			try {
 				synchronized (format) {
@@ -73,17 +75,22 @@ public class DateFormatter extends org.eclipse.egit.github.core.client.DateForma
 			} catch (ParseException e) {
 				exception = new JsonParseException(e);
 			}
+
 		throw exception;
 	}
 
 	public JsonElement serialize(Date date, Type type,
 			JsonSerializationContext context) {
+
 		final DateFormat primary = formats[0];
 		String formatted;
 		synchronized (primary) {
 			formatted = primary.format(date);
 		}
+
 		return new JsonPrimitive(formatted);
 	}
+
+	private final DateFormat[] formats;
 
 }

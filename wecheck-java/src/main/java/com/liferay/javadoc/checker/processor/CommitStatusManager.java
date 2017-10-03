@@ -11,28 +11,35 @@
  * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
  * details.
  */
+
 package com.liferay.javadoc.checker.processor;
 
 import com.liferay.javadoc.checker.model.Build;
+
+import java.io.IOException;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+
+import java.util.Objects;
+
 import org.eclipse.egit.github.core.CommitStatus;
 import org.eclipse.egit.github.core.Repository;
 import org.eclipse.egit.github.core.client.GitHubClient;
 import org.eclipse.egit.github.core.service.CommitService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 /**
  * @author Julio Camarero
  */
 @Service
 public class CommitStatusManager {
+
 	public CommitStatus setStatusPending(Repository repo, String sha) {
 		CommitStatus commitStatus = createCommitStatus(
 			CommitStatus.STATE_PENDING, "Calculating javadocs...", null);
@@ -46,18 +53,6 @@ public class CommitStatusManager {
 		CommitStatus commitStatus = createCommitStatus(baseBuild, headBuild);
 
 		return doUpdateStatus(repo, sha, commitStatus);
-	}
-
-	protected double round(double value, int places) {
-	    if (places < 0) {
-	    	throw new IllegalArgumentException();
-		}
-
-	    BigDecimal bd = new BigDecimal(value);
-
-	    bd = bd.setScale(places, RoundingMode.HALF_UP);
-
-	    return bd.doubleValue();
 	}
 
 	protected CommitStatus createCommitStatus(
@@ -77,13 +72,13 @@ public class CommitStatusManager {
 		}
 
 		double baseScore = round(baseBuild.getScore(), 2);
-		int	baseErrors = baseBuild.getErrors();
+		int baseErrors = baseBuild.getErrors();
 
 		if (headScore == baseScore) {
 			if (baseErrors == headErrors) {
 				String description = String.format(
-					"Javadocs remained the same: %.2f%% (%s errors)",
-					headScore, headErrors);
+					"Javadocs remained the same: %.2f%% (%s errors)", headScore,
+					headErrors);
 
 				return createCommitStatus(
 					CommitStatus.STATE_SUCCESS, description,
@@ -108,7 +103,7 @@ public class CommitStatusManager {
 					_buildManager.getBuildURL(headBuild));
 			}
 		}
-		else if (headScore > baseScore){
+		else if (headScore > baseScore) {
 			String description = String.format(
 				"Javadocs increased (%.2f%% / %s errors) to %.2f%% (%s errors)",
 				(headScore - baseScore), (headErrors-baseErrors), headScore,
@@ -138,17 +133,30 @@ public class CommitStatusManager {
 		commitStatus.setDescription(description);
 		commitStatus.setState(state);
 
-		if (!Objects.isNull(url)){
+		if (!Objects.isNull(url)) {
 			commitStatus.setTargetUrl(url);
 		}
 
 		return commitStatus;
 	}
 
+	protected double round(double value, int places) {
+		if (places < 0) {
+			throw new IllegalArgumentException();
+		}
+
+		BigDecimal bd = new BigDecimal(value);
+
+		bd = bd.setScale(places, RoundingMode.HALF_UP);
+
+		return bd.doubleValue();
+	}
+
 	private CommitStatus doUpdateStatus(
 		Repository repo, String sha, CommitStatus commitStatus) {
 
 		GitHubClient gitHubClient = new GitHubClient();
+
 		gitHubClient.setCredentials(
 			_credentialsManager.getGithubUser(),
 			_credentialsManager.getGithubPassword());
@@ -157,15 +165,14 @@ public class CommitStatusManager {
 
 		try {
 			_log.info(
-				"Updating status to commit " + sha + " - " +
-					repo.generateId());
+				"Updating status to commit " + sha + " - " + repo.generateId());
 
 			commitStatus = commitService.createStatus(repo, sha, commitStatus);
 		}
-		catch (IOException e) {
-			_log.error("Error updating Status: ", e);
+		catch (IOException ioe) {
+			_log.error("Error updating Status: ", ioe);
 
-			e.printStackTrace();
+			ioe.printStackTrace();
 		}
 
 		return commitStatus;
@@ -173,7 +180,6 @@ public class CommitStatusManager {
 
 	private static final Logger _log = LoggerFactory.getLogger(
 		CommitStatusManager.class);
-
 
 	@Autowired
 	private BuildManager _buildManager;

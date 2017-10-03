@@ -11,27 +11,27 @@
  * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
  * details.
  */
+
 package com.liferay.javadoc.checker.processor;
 
-import org.springframework.stereotype.Service;
-
-import javax.xml.bind.DatatypeConverter;
-import java.io.UnsupportedEncodingException;
 import java.util.Objects;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import org.springframework.stereotype.Service;
 
 /**
  * @author Julio Camarero
  */
 @Service
 public class CredentialsManager {
+
 	public String getGithubPassword() {
 		String githubPassword = System.getenv("githubPassword");
 
 		if (Objects.isNull(githubPassword)) {
-			_log.error(
-				"Missing githubPassword environment variables");
+			_log.error("Missing githubPassword environment variables");
 		}
 
 		return githubPassword;
@@ -41,8 +41,7 @@ public class CredentialsManager {
 		String githubUser = System.getenv("githubUser");
 
 		if (Objects.isNull(githubUser)) {
-			_log.error(
-				"Missing githubUser environment variables");
+			_log.error("Missing githubUser environment variables");
 		}
 
 		return githubUser;

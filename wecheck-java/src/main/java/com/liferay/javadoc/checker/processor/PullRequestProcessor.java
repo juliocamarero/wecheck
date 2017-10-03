@@ -11,15 +11,14 @@
  * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
  * details.
  */
+
 package com.liferay.javadoc.checker.processor;
 
 import java.io.IOException;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import javax.xml.transform.TransformerException;
 
+import org.eclipse.egit.github.core.PullRequest;
 import org.eclipse.egit.github.core.PullRequestMarker;
 import org.eclipse.egit.github.core.Repository;
 import org.eclipse.egit.github.core.event.PullRequestPayload;
@@ -27,7 +26,9 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 
 import org.json.JSONException;
 
-import org.eclipse.egit.github.core.PullRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -46,9 +47,8 @@ public class PullRequestProcessor {
 		Repository repo = _getRepo(pullRequest);
 
 		_log.info(
-			"Processing Pull Request from " + repo.generateId() +
-				" - Number " + pullRequest.getNumber() + " : " +
-					pullRequest.getTitle());
+			"Processing Pull Request from " + repo.generateId() + " - Number " +
+				pullRequest.getNumber() + " : " + pullRequest.getTitle());
 
 		PullRequestMarker head = pullRequest.getHead();
 
@@ -57,8 +57,7 @@ public class PullRequestProcessor {
 		String message = _buildExecutor.execute(
 			repo, head.getRef(), head.getSha());
 
-		_commentsClient.postMessage(
-			repo, pullRequest.getNumber(), message);
+		_commentsClient.postMessage(repo, pullRequest.getNumber(), message);
 	}
 
 	private Repository _getRepo(PullRequest pullRequest) {
@@ -69,12 +68,12 @@ public class PullRequestProcessor {
 		PullRequestProcessor.class);
 
 	@Autowired
-	private CommitStatusManager _commitStatusManager;
+	private BuildExecutor _buildExecutor;
 
 	@Autowired
 	private CommentsManager _commentsClient;
 
 	@Autowired
-	private BuildExecutor _buildExecutor;
+	private CommitStatusManager _commitStatusManager;
 
 }

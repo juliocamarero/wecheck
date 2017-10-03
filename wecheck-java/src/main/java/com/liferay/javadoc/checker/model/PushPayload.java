@@ -11,16 +11,24 @@
  * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
  * details.
  */
+
 package com.liferay.javadoc.checker.model;
 
 import org.eclipse.egit.github.core.Repository;
 
 /**
- *
  * @author Julio Camarero
  */
-public class PushPayload extends
-	org.eclipse.egit.github.core.event.PushPayload {
+public class PushPayload
+	extends org.eclipse.egit.github.core.event.PushPayload {
+
+	public String getAfter() {
+		return after;
+	}
+
+	public Repository getRepo() {
+		return repository;
+	}
 
 	/**
 	 * @return repository
@@ -29,8 +37,10 @@ public class PushPayload extends
 		return repository;
 	}
 
-	public Repository getRepo() {
-		return repository;
+	public PushPayload setAfter(String after) {
+		this.after = after;
+
+		return this;
 	}
 
 	/**
@@ -39,19 +49,11 @@ public class PushPayload extends
 	 */
 	public PushPayload setRepository(Repository repository) {
 		this.repository = repository;
+
 		return this;
 	}
 
-	public String getAfter() {
-		return after;
-	}
-
-	public PushPayload setAfter(String after) {
-		this.after = after;
-		return this;
-	}
-
-
-	private Repository repository;
 	private String after;
+	private Repository repository;
+
 }

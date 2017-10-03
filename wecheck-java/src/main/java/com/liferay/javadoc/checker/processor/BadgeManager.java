@@ -11,25 +11,24 @@
  * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
  * details.
  */
+
 package com.liferay.javadoc.checker.processor;
 
 import org.json.JSONException;
+
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
-
 /**
- *
  * @author Julio Camarero
  */
 @Service
 public class BadgeManager {
 
-	/*
+	/**
 	 * Returns the badge URL. For example:
 	 *	https://img.shields.io/badge/javadoc-100%-green.svg
 	 */
-	public String getBadgeURL(double score)	throws JSONException {
+	public String getBadgeURL(double score) throws JSONException {
 		StringBuilder sb = new StringBuilder(8);
 
 		sb.append(_IMG_URL_BASE);
@@ -54,8 +53,10 @@ public class BadgeManager {
 		return "red";
 	}
 
-	private final String _LABEL_TEXT = "javadoc";
 	private final String _IMG_URL_BASE = "https://img.shields.io/badge/";
+
 	private final String _IMG_URL_EXTENSION = ".svg";
+
+	private final String _LABEL_TEXT = "javadoc";
 
 }

@@ -11,17 +11,12 @@
  * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
  * details.
  */
+
 package com.liferay.javadoc.checker.checkstyle;
 
 import com.liferay.javadoc.checker.model.JavadocReport;
 import com.liferay.javadoc.checker.model.ReportError;
 import com.liferay.javadoc.checker.model.ReportFile;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
 
 import java.io.File;
 import java.io.IOException;
@@ -36,8 +31,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -48,6 +41,17 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
+import org.xml.sax.SAXException;
 
 /**
  * @author Julio Camarero
@@ -110,22 +114,67 @@ public class CheckStyleExecutor {
 
 			report = processXML(_path);
 		}
-		catch (SAXException e) {
-			e.printStackTrace();
+		catch (SAXException saxe) {
+			saxe.printStackTrace();
 		}
-		catch (ParserConfigurationException e) {
-			e.printStackTrace();
+		catch (ParserConfigurationException pce) {
+			pce.printStackTrace();
 		}
 
 		return report;
 	}
 
+	public void setConfigurationFile(String configurationFile) {
+		_configurationFile = configurationFile;
+	}
+
+	public void setFormat(String format) {
+		if ((format != null) && !format.isEmpty()) {
+			_format = format;
+		}
+	}
+
+	public void setStyleSheetFile(String styleSheetFile) {
+		_styleSheetFile = styleSheetFile;
+	}
+
+	private String getAttribute(Node node, String atribute) {
+		NamedNodeMap attributesMap = node.getAttributes();
+
+		Node attributeNode = attributesMap.getNamedItem(atribute);
+
+		if (attributeNode == null) {
+			return null;
+		}
+
+		return attributeNode.getNodeValue();
+	}
+
+	private File getResourceFile(String fileName) {
+		ClassLoader classLoader = getClass().getClassLoader();
+
+		URL resource = classLoader.getResource(fileName);
+
+		return new File(resource.getFile());
+	}
+
+	private String getResourceLocation(String fileName) {
+		ClassLoader classLoader = getClass().getClassLoader();
+
+		URL resource = classLoader.getResource(fileName);
+
+		return resource.toExternalForm();
+	}
+
 	private JavadocReport processXML(String path)
-		throws IOException, SAXException, ParserConfigurationException,
+		throws IOException, ParserConfigurationException, SAXException,
 			TransformerException {
 
-		DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+		DocumentBuilderFactory docFactory =
+			DocumentBuilderFactory.newInstance();
+
 		DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+
 		Document doc = docBuilder.parse(_outputXMLFile);
 
 		JavadocReport report = new JavadocReport();
@@ -146,8 +195,7 @@ public class CheckStyleExecutor {
 				nameValue.lastIndexOf("/") + 1);
 
 			String filePath = nameValue.substring(
-				path.length(),
-				(nameValue.length() -fileName.length()));
+				path.length(), (nameValue.length() -fileName.length()));
 
 			ReportFile file = new ReportFile();
 
@@ -228,48 +276,6 @@ public class CheckStyleExecutor {
 		return report;
 	}
 
-	private String getAttribute(Node node, String atribute) {
-		NamedNodeMap attributesMap = node.getAttributes();
-
-		Node attributeNode = attributesMap.getNamedItem(atribute);
-
-		if (attributeNode == null) {
-			return null;
-		}
-
-		return attributeNode.getNodeValue();
-	}
-
-	public void setConfigurationFile(String configurationFile) {
-		_configurationFile = configurationFile;
-	}
-
-	public void setFormat(String format) {
-		if ((format != null) && !format.isEmpty()) {
-			_format = format;
-		}
-	}
-
-	public void setStyleSheetFile(String styleSheetFile) {
-		_styleSheetFile = styleSheetFile;
-	}
-
-	private File getResourceFile(String fileName) {
-		ClassLoader classLoader = getClass().getClassLoader();
-
-		URL resource = classLoader.getResource(fileName);
-
-		return new File(resource.getFile());
-	}
-
-	private String getResourceLocation(String fileName) {
-		ClassLoader classLoader = getClass().getClassLoader();
-
-		URL resource = classLoader.getResource(fileName);
-
-		return resource.toExternalForm();
-	}
-
 	private String transform() throws IOException, TransformerException {
 		TransformerFactory factory = TransformerFactory.newInstance();
 
@@ -301,9 +307,9 @@ public class CheckStyleExecutor {
 	private String[] _includeDirectories;
 	private String _outputHTMLFile = "checkstyle_report.html";
 	private String _outputXMLFile = "checkstyle_report.xml";
+	private String _path;
 	private String _styleSheetFile;
 	private String _styleSheetFileLocation = "checkstyle/checkstyle.xsl";
 	private Map<String, Object> _XSLParameters;
-	private String _path;
 
 }

@@ -11,19 +11,25 @@
  * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
  * details.
  */
+
 package com.liferay.javadoc.checker.processor;
 
 import com.liferay.javadoc.checker.model.PushPayload;
-import org.eclipse.egit.github.core.Repository;
-import org.eclipse.jgit.api.errors.GitAPIException;
-import org.json.JSONException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+
+import java.io.IOException;
 
 import javax.xml.transform.TransformerException;
-import java.io.IOException;
+
+import org.eclipse.egit.github.core.Repository;
+import org.eclipse.jgit.api.errors.GitAPIException;
+
+import org.json.JSONException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 /**
  * @author Julio Camarero
@@ -54,9 +60,9 @@ public class PushProcessor {
 		PushProcessor.class);
 
 	@Autowired
-	private CommitStatusManager _commitStatusManager;
+	private BuildExecutor _buildExecutor;
 
 	@Autowired
-	private BuildExecutor _buildExecutor;
+	private CommitStatusManager _commitStatusManager;
 
 }

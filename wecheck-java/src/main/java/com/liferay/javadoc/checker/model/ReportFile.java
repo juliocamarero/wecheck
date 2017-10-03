@@ -11,19 +11,20 @@
  * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
  * details.
  */
+
 package com.liferay.javadoc.checker.model;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- *
  * @author Julio Camarero
  */
 public class ReportFile {
 
-	public static final String STATUS_OK = "ok";
 	public static final String STATUS_ERROR = "error";
+
+	public static final String STATUS_OK = "ok";
 
 	public ReportFile() {
 		errors = new ArrayList<>();
@@ -33,36 +34,37 @@ public class ReportFile {
 		errors.add(error);
 	}
 
-	public String getPath() {
-		return path;
-	}
-
-	public void setPath(String path) {
-		this.path = path;
+	public List<ReportError> getErrors() {
+		return errors;
 	}
 
 	public String getName() {
 		return name;
 	}
 
-	public void setName(String name) {
-		this.name = name;
+	public String getPath() {
+		return path;
 	}
 
 	public String getStatus() {
 		return status;
 	}
 
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public void setPath(String path) {
+		this.path = path;
+	}
+
 	public void setStatus(String status) {
 		this.status = status;
 	}
 
-	public List<ReportError> getErrors() {
-		return errors;
-	}
-
-	private String path;
-	private String name;
-	private String status;
 	private List<ReportError> errors;
+	private String name;
+	private String path;
+	private String status;
+
 }

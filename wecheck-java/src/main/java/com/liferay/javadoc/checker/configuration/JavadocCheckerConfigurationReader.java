@@ -11,6 +11,7 @@
  * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
  * details.
  */
+
 package com.liferay.javadoc.checker.configuration;
 
 import java.io.FileInputStream;
@@ -18,6 +19,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import java.util.Properties;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,7 +62,7 @@ public class JavadocCheckerConfigurationReader {
 	}
 
 	public String[] getIncludeDirectories() {
-		String[] includeDirectories = new String[] {"."};
+		String[] includeDirectories = {"."};
 
 		if (_properties != null) {
 			String value = _properties.getProperty("include.directories");

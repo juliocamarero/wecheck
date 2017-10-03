@@ -11,10 +11,10 @@
  * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
  * details.
  */
+
 package com.liferay.javadoc.checker.model;
 
 /**
- *
  * @author Julio Camarero
  */
 public class ReportError {
@@ -22,50 +22,50 @@ public class ReportError {
 	public ReportError() {
 	}
 
-	public int getLine() {
-		return line;
-	}
-
-	public void setLine(int line) {
-		this.line = line;
-	}
-
 	public int getColumn() {
 		return column;
 	}
 
-	public void setColumn(int column) {
-		this.column = column;
-	}
-
-	public String getSeverity() {
-		return severity;
-	}
-
-	public void setSeverity(String severity) {
-		this.severity = severity;
+	public int getLine() {
+		return line;
 	}
 
 	public String getMessage() {
 		return message;
 	}
 
-	public void setMessage(String message) {
-		this.message = message;
+	public String getSeverity() {
+		return severity;
 	}
 
 	public String getSource() {
 		return source;
 	}
 
+	public void setColumn(int column) {
+		this.column = column;
+	}
+
+	public void setLine(int line) {
+		this.line = line;
+	}
+
+	public void setMessage(String message) {
+		this.message = message;
+	}
+
+	public void setSeverity(String severity) {
+		this.severity = severity;
+	}
+
 	public void setSource(String source) {
 		this.source = source;
 	}
 
-	private int line;
 	private int column;
-	private String severity;
+	private int line;
 	private String message;
+	private String severity;
 	private String source;
 
 }

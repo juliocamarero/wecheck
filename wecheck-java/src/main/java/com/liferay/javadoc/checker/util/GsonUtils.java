@@ -11,33 +11,35 @@
  * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
  * details.
  */
+
 package com.liferay.javadoc.checker.util;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import org.eclipse.egit.github.core.client.EventFormatter;
-import org.eclipse.egit.github.core.event.Event;
-
-import java.util.Date;
 
 import static com.google.gson.FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
+import java.util.Date;
+
+import org.eclipse.egit.github.core.client.EventFormatter;
+import org.eclipse.egit.github.core.event.Event;
+
 /**
- *
  * @author Julio Camarero
  */
 public class GsonUtils {
 
-	private static final Gson GSON = createGson(true);
-
 	public static final Gson createGson(final boolean serializeNulls) {
 		final GsonBuilder builder = new GsonBuilder();
+
 		// We have to use our own DateFormatter
+
 		builder.registerTypeAdapter(Date.class, new DateFormatter());
 		builder.registerTypeAdapter(Event.class, new EventFormatter());
 		builder.setFieldNamingPolicy(LOWER_CASE_WITH_UNDERSCORES);
-		if (serializeNulls)
-			builder.serializeNulls();
+
+		if (serializeNulls)builder.serializeNulls();
+
 		return builder.create();
 	}
 
@@ -61,5 +63,7 @@ public class GsonUtils {
 	public static final String toJson(final Object object) {
 		return GSON.toJson(object);
 	}
+
+	private static final Gson GSON = createGson(true);
 
 }

@@ -11,13 +11,13 @@
  * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
  * details.
  */
+
 package com.liferay.javadoc.checker.model;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- *
  * @author Julio Camarero
  */
 public class JavadocReport {
@@ -26,52 +26,61 @@ public class JavadocReport {
 		files = new ArrayList<>();
 	}
 
-	public int getTotalFiles() {
-		return totalFiles;
+	public void addReportFile(ReportFile file) {
+		files.add(file);
 	}
 
-	public void setTotalFiles(int totalFiles) {
-		this.totalFiles = totalFiles;
+	public List<ReportFile> getFiles() {
+		return files;
+	}
+
+	public double getScore() {
+		return ((double)totalCorrectFiles / (double)totalFiles) * 100;
 	}
 
 	public int getTotalCorrectFiles() {
 		return totalCorrectFiles;
 	}
 
-	public void setTotalCorrectFiles(int totalCorrectFiles) {
-		this.totalCorrectFiles = totalCorrectFiles;
-	}
-
 	public int getTotalErrors() {
 		return totalErrors;
 	}
 
-	public void setTotalErrors(int totalErrors) {
-		this.totalErrors = totalErrors;
-	}
-
-	public double getScore() {
-		return ((double) totalCorrectFiles / (double) totalFiles) * 100;
-	}
-
-	public String retrieveXml() {
-		return _xml;
-	}
-
-	public void setXml(String xml) {
-		_xml = xml;
+	public int getTotalFiles() {
+		return totalFiles;
 	}
 
 	public String retrieveHtml() {
 		return _html;
 	}
 
+	public String retrieveXml() {
+		return _xml;
+	}
+
 	public void setHtml(String html) {
 		_html = html;
 	}
 
+	public void setTotalCorrectFiles(int totalCorrectFiles) {
+		this.totalCorrectFiles = totalCorrectFiles;
+	}
+
+	public void setTotalErrors(int totalErrors) {
+		this.totalErrors = totalErrors;
+	}
+
+	public void setTotalFiles(int totalFiles) {
+		this.totalFiles = totalFiles;
+	}
+
+	public void setXml(String xml) {
+		_xml = xml;
+	}
+
 	public String toString() {
 		StringBuilder sb = new StringBuilder(9);
+
 		sb.append("Correct Files: ");
 		sb.append(totalCorrectFiles);
 		sb.append("/");
@@ -85,21 +94,13 @@ public class JavadocReport {
 		return sb.toString();
 	}
 
-	public List<ReportFile> getFiles() {
-		return files;
-	}
-
-	public void addReportFile(ReportFile file) {
-		files.add(file);
-	}
-
 	// These fields are not converted to JSON because they don't have a get method
-	private transient String _xml;
-	private transient String _html;
 
-	private int totalFiles = 0;
+	private transient String _html;
+	private transient String _xml;
+	private List<ReportFile> files;
 	private int totalCorrectFiles = 0;
 	private int totalErrors = 0;
-	private List<ReportFile> files;
+	private int totalFiles = 0;
 
 }

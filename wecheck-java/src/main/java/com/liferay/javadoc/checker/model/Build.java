@@ -11,10 +11,10 @@
  * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
  * details.
  */
+
 package com.liferay.javadoc.checker.model;
 
 /**
- *
  * @author Julio Camarero
  */
 public class Build {
@@ -22,86 +22,86 @@ public class Build {
 	public Build() {
 	}
 
-	public String getRepoOwner() {
-		return repoOwner;
-	}
-
-	public void setRepoOwner(String repoOwner) {
-		this.repoOwner = repoOwner;
-	}
-
-	public String getRepoName() {
-		return repoName;
-	}
-
-	public void setRepoName(String repoName) {
-		this.repoName = repoName;
-	}
-
 	public String getBranch() {
 		return branch;
-	}
-
-	public void setBranch(String branch) {
-		this.branch = branch;
-	}
-
-	public String getSha() {
-		return sha;
-	}
-
-	public void setSha(String sha) {
-		this.sha = sha;
-	}
-
-	public double getScore() {
-		return score;
-	}
-
-	public void setScore(double score) {
-		this.score = score;
-	}
-
-	public void setErrors(int errors) {
-		this.errors = errors;
 	}
 
 	public int getErrors() {
 		return errors;
 	}
 
-	public long getTime() {
-		return time;
-	}
-
-	public void setTime(long time) {
-		this.time = time;
+	public String getId() {
+		return id;
 	}
 
 	public JavadocReport getJavadocReport() {
 		return javadocReport;
 	}
 
-	public void setJavadocReport(JavadocReport javadocReport) {
-		this.javadocReport = javadocReport;
+	public String getRepoName() {
+		return repoName;
 	}
 
-	public String getId() {
-		return id;
+	public String getRepoOwner() {
+		return repoOwner;
+	}
+
+	public double getScore() {
+		return score;
+	}
+
+	public String getSha() {
+		return sha;
+	}
+
+	public long getTime() {
+		return time;
+	}
+
+	public void setBranch(String branch) {
+		this.branch = branch;
+	}
+
+	public void setErrors(int errors) {
+		this.errors = errors;
 	}
 
 	public void setId(String id) {
 		this.id = id;
 	}
 
-	private String id;
-	private String repoOwner;
-	private String repoName;
+	public void setJavadocReport(JavadocReport javadocReport) {
+		this.javadocReport = javadocReport;
+	}
+
+	public void setRepoName(String repoName) {
+		this.repoName = repoName;
+	}
+
+	public void setRepoOwner(String repoOwner) {
+		this.repoOwner = repoOwner;
+	}
+
+	public void setScore(double score) {
+		this.score = score;
+	}
+
+	public void setSha(String sha) {
+		this.sha = sha;
+	}
+
+	public void setTime(long time) {
+		this.time = time;
+	}
+
 	private String branch;
+	private int errors;
+	private String id;
+	private JavadocReport javadocReport;
+	private String repoName;
+	private String repoOwner;
+	private double score;
 	private String sha;
 	private long time;
-	private double score;
-	private int errors;
-	private JavadocReport javadocReport;
 
 }

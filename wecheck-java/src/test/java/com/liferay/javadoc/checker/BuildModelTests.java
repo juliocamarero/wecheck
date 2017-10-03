@@ -1,21 +1,23 @@
 package com.liferay.javadoc.checker;
 
+import com.liferay.javadoc.checker.model.Build;
 import com.liferay.javadoc.checker.model.JavadocReport;
 import com.liferay.javadoc.checker.model.ReportError;
 import com.liferay.javadoc.checker.model.ReportFile;
-import com.liferay.javadoc.checker.model.Build;
 import com.liferay.javadoc.checker.util.GsonUtils;
+
+import java.util.Date;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import java.util.Date;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -30,13 +32,15 @@ public class BuildModelTests {
 		Assert.assertEquals(
 			jsonObject.getString("repo_name"), build.getRepoName());
 
-		JSONObject javadocReportJSON = jsonObject.getJSONObject("javadoc_report");
+		JSONObject javadocReportJSON = jsonObject.getJSONObject(
+			"javadoc_report");
 
 		Assert.assertEquals(
 			javadocReportJSON.getInt("total_errors"),
 			build.getJavadocReport().getTotalErrors());
 
 		JSONArray files = javadocReportJSON.getJSONArray("files");
+
 		JSONObject file = files.getJSONObject(0);
 
 		Assert.assertEquals(
@@ -44,6 +48,7 @@ public class BuildModelTests {
 			build.getJavadocReport().getFiles().get(0).getStatus());
 
 		JSONArray errors = file.getJSONArray("errors");
+
 		JSONObject error = errors.getJSONObject(0);
 
 		Assert.assertEquals(
