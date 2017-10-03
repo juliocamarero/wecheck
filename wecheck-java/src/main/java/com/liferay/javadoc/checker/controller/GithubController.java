@@ -11,19 +11,21 @@
  * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
  * details.
  */
+
 package com.liferay.javadoc.checker.controller;
 
-import com.liferay.javadoc.checker.model.PushPayload;
+import com.liferay.javadoc.checker.model.GithubRequest;
 import com.liferay.javadoc.checker.processor.PullRequestProcessor;
+import com.liferay.javadoc.checker.processor.PushProcessor;
 
-import java.util.Objects;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+import javax.annotation.PostConstruct;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.liferay.javadoc.checker.processor.PushProcessor;
-import com.liferay.javadoc.checker.util.GsonUtils;
-import org.eclipse.egit.github.core.Repository;
-import org.eclipse.egit.github.core.event.PullRequestPayload;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -39,94 +41,48 @@ public class GithubController {
 
 	public static final String ROOT_PATH = "/github";
 
+	@PostMapping("/pull-request")
+	@ResponseBody
+	public String processRequestFromGithub(
+		@RequestHeader(value ="X-Github-Event") String eventType,
+		@RequestBody String payload) {
+
+		_log.info("Received event from Github: " + eventType);
+
+		GithubRequest githubRequest = new GithubRequest(
+			payload, eventType, _pullRequestProcessor, _pushProcessor);
+
+		_executorService.submit(githubRequest);
+
+		return "SUCCESS";
+	}
+
 	@GetMapping("/test")
 	@ResponseBody
 	public String test() {
 		return "hello";
 	}
 
-	@PostMapping("/pull-request")
-	@ResponseBody
-	public String processRequestFromGithub(
-		@RequestHeader(value="X-Github-Event") String eventType,
-		@RequestBody String payload) {
+	@PostConstruct
+	private void initializeExecutorService() {
+		int processors = Runtime.getRuntime().availableProcessors();
 
-		_log.info(
-			"Received event from Github: " + eventType);
+		_log.debug(
+			"Initializing Executor Service with a Thred Pool of " + processors +
+				" Thread Workers.");
 
-		if (eventType.equals("pull_request")) {
-			PullRequestPayload pullRequestPayload = GsonUtils.fromJson(
-				payload, PullRequestPayload.class);
-
-			String action = pullRequestPayload.getAction();
-
-			if ("opened".equals(action) ||
-				"synchronize".equals(action) ||
-				"reopened".equals(action)) {
-
-				_log.info(
-					"Processing pull request (action: " +
-						pullRequestPayload.getAction() + " )");
-
-				try {
-					_pullRequestProcessor.process(pullRequestPayload);
-				}
-				catch (Exception e) {
-					_log.error("Error processing pull request: ", e);
-				}
-			}
-			else {
-				_log.info(
-					"Ignoring pull request (action: " +
-						pullRequestPayload.getAction()+ " )");
-			}
-		}
-		else if (eventType.equals("push")) {
-			PushPayload pushPayload = GsonUtils.fromJson(
-				payload, PushPayload.class);
-
-			Repository repo = pushPayload.getRepo();
-
-			String defaultBranch = repo.getDefaultBranch();
-
-			String ref = pushPayload.getRef();
-
-			String pushedToBranch = ref.substring(ref.lastIndexOf("/") + 1);
-
-			if (Objects.equals(pushedToBranch, defaultBranch)) {
-				_log.info(
-					"Processing Push Event to default Branch (branch: "
-						+ pushedToBranch + " )");
-
-				try {
-					_pushProcessor.process(pushPayload);
-				}
-				catch (Exception e) {
-					_log.error("Error processing push event: ", e);
-
-					e.printStackTrace();
-				}
-			}
-			else {
-				_log.info(
-					"Ignoring push event to branch (branch: "
-						+ pushPayload.getRef() + " )");
-			}
-		}
-		else {
-			_log.info("Ignoring event: " + eventType);
-		}
-
-		return "SUCCESS";
+		_executorService = Executors.newFixedThreadPool(processors);
 	}
 
-	@Autowired
-	private PushProcessor _pushProcessor;
+	private static final Logger _log = LoggerFactory.getLogger(
+		GithubController.class);
+
+	private ExecutorService _executorService;
 
 	@Autowired
 	private PullRequestProcessor _pullRequestProcessor;
 
-	private static final Logger _log = LoggerFactory.getLogger(
-		GithubController.class);
+	@Autowired
+	private PushProcessor _pushProcessor;
 
 }
