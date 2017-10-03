@@ -67,7 +67,7 @@ public class GithubController {
 	private void initializeExecutorService() {
 		int processors = Runtime.getRuntime().availableProcessors();
 
-		_log.debug(
+		_log.info(
 			"Initializing Executor Service with a Thred Pool of " + processors +
 				" Thread Workers.");
 
