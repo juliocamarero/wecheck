@@ -34,8 +34,8 @@ public class BadgeManager {
 		sb.append(_IMG_URL_BASE);
 		sb.append(_LABEL_TEXT);
 		sb.append("-");
-		sb.append(String.format("%.2f%%", score));
-		sb.append("-");
+		sb.append(String.format("%.2f%", score));
+		sb.append("%25-");
 		sb.append(_getColor(score));
 		sb.append(_IMG_URL_EXTENSION);
 
