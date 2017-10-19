@@ -128,7 +128,15 @@ public class BuildExecutor {
 			}
 		}
 
-		return report.retrieveHtml();
+		StringBuilder sb = new StringBuilder(6);
+
+		sb.append(report.retrieveHtml());
+		sb.append("<br />");
+		sb.append("<img alt=\"javadocs-badge\" src=\"");
+		sb.append(_badgeManager.getBadgeURL(report.getScore()));
+		sb.append("\" />");
+
+		return sb.toString();
 	}
 
 	private static final Logger _log = LoggerFactory.getLogger(
@@ -136,6 +144,9 @@ public class BuildExecutor {
 
 	@Autowired
 	private BuildManager _buildManager;
+
+	@Autowired
+	private BadgeManager _badgeManager;
 
 	@Autowired
 	private CommitStatusManager _commitStatusManager;
