@@ -26,7 +26,7 @@ public class BadgeManager {
 
 	/**
 	 * Returns the badge URL. For example:
-	 *	https://img.shields.io/badge/javadoc-100%-green.svg
+	 * https://img.shields.io/badge/javadoc-100%-green.svg
 	 */
 	public String getBadgeURL(double score) throws JSONException {
 		StringBuilder sb = new StringBuilder(8);

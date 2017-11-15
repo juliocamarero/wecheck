@@ -40,16 +40,17 @@ import org.springframework.stereotype.Service;
 @Service
 public class CommitStatusManager {
 
-	public CommitStatus setStatusPending(Repository repo, String sha) {
+	public CommitStatus setStatusException(Repository repo, String sha) {
 		CommitStatus commitStatus = createCommitStatus(
-			CommitStatus.STATE_PENDING, "Calculating javadocs...", null);
+			CommitStatus.STATE_ERROR,
+			"There was an error calculating javadocs.", null);
 
 		return doUpdateStatus(repo, sha, commitStatus);
 	}
 
-	public CommitStatus setStatusException(Repository repo, String sha) {
+	public CommitStatus setStatusPending(Repository repo, String sha) {
 		CommitStatus commitStatus = createCommitStatus(
-			CommitStatus.STATE_ERROR, "There was an error calculating javadocs.", null);
+			CommitStatus.STATE_PENDING, "Calculating javadocs...", null);
 
 		return doUpdateStatus(repo, sha, commitStatus);
 	}

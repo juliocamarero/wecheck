@@ -168,7 +168,7 @@ public class CheckStyleExecutor {
 
 	private JavadocReport processXML(String path)
 		throws IOException, ParserConfigurationException, SAXException,
-			TransformerException {
+			   TransformerException {
 
 		DocumentBuilderFactory docFactory =
 			DocumentBuilderFactory.newInstance();
