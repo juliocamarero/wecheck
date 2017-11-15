@@ -49,6 +49,8 @@ public class GithubController {
 
 		_log.info("Received event from Github: " + eventType);
 
+		_log.info("Payload:" + payload);
+
 		GithubRequest githubRequest = new GithubRequest(
 			payload, eventType, _pullRequestProcessor, _pushProcessor);
 
