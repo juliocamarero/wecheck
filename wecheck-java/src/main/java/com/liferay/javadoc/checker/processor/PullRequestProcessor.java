@@ -40,38 +40,45 @@ public class PullRequestProcessor {
 
 	public void process(PullRequestPayload payload)
 		throws GitAPIException, InterruptedException, IOException,
-			JSONException, TransformerException {
+			   JSONException, TransformerException {
 
 		PullRequest pullRequest = payload.getPullRequest();
 
-		Repository repo = _getRepo(pullRequest);
+		Repository baseRepo = _getBaseRepo(pullRequest);
+		Repository headRepo = _getHeadRepo(pullRequest);
 
 		_log.info(
-			"Processing Pull Request from " + repo.generateId() + " - Number " +
-				pullRequest.getNumber() + " : " + pullRequest.getTitle());
+			"Processing Pull Request from " + headRepo.generateId() +
+				" - Number " + pullRequest.getNumber() + " : " +
+					pullRequest.getTitle());
 
 		PullRequestMarker head = pullRequest.getHead();
 
-		_commitStatusManager.setStatusPending(repo, head.getSha());
+		_commitStatusManager.setStatusPending(headRepo, head.getSha());
 
 		try {
 			String message = _buildExecutor.execute(
-				repo, head.getRef(), head.getSha());
+				headRepo, baseRepo, head.getRef(), head.getSha());
 
-			_commentsClient.postMessage(repo, pullRequest.getNumber(), message);
+			_commentsClient.postMessage(
+				baseRepo, pullRequest.getNumber(), message);
 		}
 		catch (Exception e) {
 			_log.error(e.getMessage(), e);
 
 			_commentsClient.postMessage(
-				repo, pullRequest.getNumber(),
+				baseRepo, pullRequest.getNumber(),
 				"Error while trying to calculate javadocs: " + e.getMessage());
 
-			_commitStatusManager.setStatusException(repo, head.getSha());
+			_commitStatusManager.setStatusException(headRepo, head.getSha());
 		}
 	}
 
-	private Repository _getRepo(PullRequest pullRequest) {
+	private Repository _getBaseRepo(PullRequest pullRequest) {
+		return pullRequest.getBase().getRepo();
+	}
+
+	private Repository _getHeadRepo(PullRequest pullRequest) {
 		return pullRequest.getHead().getRepo();
 	}
 

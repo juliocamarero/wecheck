@@ -39,7 +39,7 @@ public class PushProcessor {
 
 	public void process(PushPayload pushPayload)
 		throws GitAPIException, InterruptedException, IOException,
-			JSONException, TransformerException {
+			   JSONException, TransformerException {
 
 		Repository repo = pushPayload.getRepo();
 
@@ -54,7 +54,7 @@ public class PushProcessor {
 		String pushedToBranch = ref.substring(ref.lastIndexOf("/") + 1);
 
 		try {
-			_buildExecutor.execute(repo, pushedToBranch, sha);
+			_buildExecutor.execute(repo, repo, pushedToBranch, sha);
 		}
 		catch (Exception e) {
 			_log.error(e.getMessage(), e);

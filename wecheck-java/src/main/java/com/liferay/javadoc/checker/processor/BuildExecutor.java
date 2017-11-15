@@ -52,9 +52,10 @@ import org.springframework.stereotype.Service;
 @Service
 public class BuildExecutor {
 
-	public String execute(Repository repo, String branch, String sha)
+	public String execute(
+			Repository headRepo, Repository baseRepo, String branch, String sha)
 		throws GitAPIException, InterruptedException, IOException,
-			JSONException, TransformerException {
+			   JSONException, TransformerException {
 
 		Random random = new Random();
 
@@ -65,10 +66,10 @@ public class BuildExecutor {
 		JavadocReport report = null;
 
 		try {
-			_log.debug("Clonning git Repo: " + repo.getName());
+			_log.debug("Clonning git Repo: " + headRepo.getName());
 
 			git = Git.cloneRepository()
-				.setURI(repo.getCloneUrl())
+				.setURI(headRepo.getCloneUrl())
 				.setDirectory(dir)
 				.setBranchesToClone(singleton("refs/heads/" + branch))
 				.setBranch("refs/heads/" + branch)
@@ -98,14 +99,14 @@ public class BuildExecutor {
 			// We always compare with the default branch of the Repo
 
 			Build baseBuild = _buildManager.getBuild(
-				repo.getOwner().getLogin(), repo.getName(),
-				repo.getDefaultBranch());
+				baseRepo.getOwner().getLogin(), baseRepo.getName(),
+				baseRepo.getDefaultBranch());
 
 			Build headBuild = new Build();
 
 			headBuild.setBranch(branch);
-			headBuild.setRepoOwner(repo.getOwner().getLogin());
-			headBuild.setRepoName(repo.getName());
+			headBuild.setRepoOwner(headRepo.getOwner().getLogin());
+			headBuild.setRepoName(headRepo.getName());
 			headBuild.setJavadocReport(report);
 			headBuild.setScore(report.getScore());
 			headBuild.setErrors(report.getTotalErrors());
@@ -114,10 +115,11 @@ public class BuildExecutor {
 
 			headBuild = _buildManager.saveBuild(headBuild);
 
-			_commitStatusManager.updateStatus(repo, sha, baseBuild, headBuild);
+			_commitStatusManager.updateStatus(
+				headRepo, sha, baseBuild, headBuild);
 
 			_log.info(
-				"Build Execution finished for " + repo.getName() +
+				"Build Execution finished for " + headRepo.getName() +
 				" - branch " + branch);
 		}
 		finally {
@@ -143,10 +145,10 @@ public class BuildExecutor {
 		PullRequestProcessor.class);
 
 	@Autowired
-	private BuildManager _buildManager;
+	private BadgeManager _badgeManager;
 
 	@Autowired
-	private BadgeManager _badgeManager;
+	private BuildManager _buildManager;
 
 	@Autowired
 	private CommitStatusManager _commitStatusManager;
