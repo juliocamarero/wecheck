@@ -47,6 +47,13 @@ public class CommitStatusManager {
 		return doUpdateStatus(repo, sha, commitStatus);
 	}
 
+	public CommitStatus setStatusException(Repository repo, String sha) {
+		CommitStatus commitStatus = createCommitStatus(
+			CommitStatus.STATE_ERROR, "There was an error calculating javadocs.", null);
+
+		return doUpdateStatus(repo, sha, commitStatus);
+	}
+
 	public CommitStatus updateStatus(
 		Repository repo, String sha, Build baseBuild, Build headBuild) {
 

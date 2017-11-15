@@ -53,7 +53,14 @@ public class PushProcessor {
 
 		String pushedToBranch = ref.substring(ref.lastIndexOf("/") + 1);
 
-		_buildExecutor.execute(repo, pushedToBranch, sha);
+		try {
+			_buildExecutor.execute(repo, pushedToBranch, sha);
+		}
+		catch (Exception e) {
+			_log.error(e.getMessage(), e);
+
+			_commitStatusManager.setStatusException(repo, sha);
+		}
 	}
 
 	private static final Logger _log = LoggerFactory.getLogger(

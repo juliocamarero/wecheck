@@ -54,10 +54,21 @@ public class PullRequestProcessor {
 
 		_commitStatusManager.setStatusPending(repo, head.getSha());
 
-		String message = _buildExecutor.execute(
-			repo, head.getRef(), head.getSha());
+		try {
+			String message = _buildExecutor.execute(
+				repo, head.getRef(), head.getSha());
 
-		_commentsClient.postMessage(repo, pullRequest.getNumber(), message);
+			_commentsClient.postMessage(repo, pullRequest.getNumber(), message);
+		}
+		catch (Exception e) {
+			_log.error(e.getMessage(), e);
+
+			_commentsClient.postMessage(
+				repo, pullRequest.getNumber(),
+				"Error while trying to calculate javadocs: " + e.getMessage());
+
+			_commitStatusManager.setStatusException(repo, head.getSha());
+		}
 	}
 
 	private Repository _getRepo(PullRequest pullRequest) {
