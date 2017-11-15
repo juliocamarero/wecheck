@@ -48,13 +48,13 @@ public class PullRequestProcessor {
 		Repository headRepo = _getHeadRepo(pullRequest);
 
 		_log.info(
-			"Processing Pull Request from " + headRepo.generateId() +
+			"Processing Pull Request from " + baseRepo.generateId() +
 				" - Number " + pullRequest.getNumber() + " : " +
 					pullRequest.getTitle());
 
 		PullRequestMarker head = pullRequest.getHead();
 
-		_commitStatusManager.setStatusPending(headRepo, head.getSha());
+		_commitStatusManager.setStatusPending(baseRepo, head.getSha());
 
 		try {
 			String message = _buildExecutor.execute(
@@ -70,7 +70,7 @@ public class PullRequestProcessor {
 				baseRepo, pullRequest.getNumber(),
 				"Error while trying to calculate javadocs: " + e.getMessage());
 
-			_commitStatusManager.setStatusException(headRepo, head.getSha());
+			_commitStatusManager.setStatusException(baseRepo, head.getSha());
 		}
 	}
 

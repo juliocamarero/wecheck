@@ -116,10 +116,10 @@ public class BuildExecutor {
 			headBuild = _buildManager.saveBuild(headBuild);
 
 			_commitStatusManager.updateStatus(
-				headRepo, sha, baseBuild, headBuild);
+				baseRepo, sha, baseBuild, headBuild);
 
 			_log.info(
-				"Build Execution finished for " + headRepo.getName() +
+				"Build Execution finished for " + baseRepo.getName() +
 				" - branch " + branch);
 		}
 		finally {
