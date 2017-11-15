@@ -72,7 +72,7 @@ public class PullRequestProcessor {
 	}
 
 	private Repository _getRepo(PullRequest pullRequest) {
-		return pullRequest.getBase().getRepo();
+		return pullRequest.getHead().getRepo();
 	}
 
 	private static final Logger _log = LoggerFactory.getLogger(
